@@ -1,0 +1,49 @@
+{
+    "coursename": "samplecourse",
+    "totalmodules": 0,
+    "data": [
+        {
+            "studentname": "student1",
+            "rollnumber": "123",
+            "email": "123",
+            "completionpercentage": "",
+            "moduledata": [
+                {
+                    "modulename": "module1",
+                    "mcqscore": 10,
+                    "codescore": 10,
+                    "totalscore": 20,
+                    "errors": 2,
+                    "compiles": 2,
+                    "time": 3
+                },
+                {
+                    "modulename": "module2",
+                    "mcqscore": 10,
+                    "codescore": 10,
+                    "totalscore": 20,
+                    "errors": 2,
+                    "compiles": 2,
+                    "time": 3
+                }
+            ]
+        },
+        {
+            "studentname": "student2",
+            "rollnumber": "124",
+            "email": "124",
+            "completionpercentage": "",
+            "moduledata": [
+                {
+                    "modulename": "module1",
+                    "mcqscore": 10,
+                    "codescore": 10,
+                    "totalscore": 20,
+                    "errors": 2,
+                    "compiles": 2,
+                    "time": 3
+                }
+            ]
+        }
+    ]
+}
