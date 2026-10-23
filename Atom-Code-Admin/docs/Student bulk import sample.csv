@@ -1,0 +1,3 @@
+﻿name,department,batch,rollnumber,email,isActive,section
+Mohanraj,cse,2022-2026,cs0001,0001.studentx@atom.com,TRUE,a
+Krishna,it,2021-2025,cs0002,0002.studenxt@atom.com,TRUE,b
