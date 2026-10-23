@@ -6,9 +6,9 @@ import { DataTableColumnHeader } from "@/components/data-tables/data-table-colum
 import { format } from 'date-fns';
 
 import { ModuleTableType } from "@/schemas/module-schema";
-import MCODEView from "@/components/module/module-table/m-codeview";
-import MMCQView from "@/components/module/module-table/m-mcqview";
-import MReferences from "@/components/module/module-table/m-references";
+import MCODEView from "@/components/staff/module/module-table/m-codeview";
+import MMCQView from "@/components/staff/module/module-table/m-mcqview";
+import MReferences from "@/components/staff/module/module-table/m-references";
 
 export const columns: ColumnDef<ModuleTableType>[] = [
   // {

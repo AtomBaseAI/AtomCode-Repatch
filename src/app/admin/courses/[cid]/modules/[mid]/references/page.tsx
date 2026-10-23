@@ -11,7 +11,7 @@ async function fetchReferences(mid: string) {
     const references = await getAllReferencesByModuleId(mid)
     return z.array(ModuleReferenceTableSchema).parse(references)
 }
-export default async function ModuleReference({ params }: { params: Promise<{ mid: string> } }) {
+export default async function ModuleReference({ params }: { params: Promise<{ mid: string}> }) {
     const { mid } = await params
     // const moduleId = parseInt(mid, 10);
     const references = await fetchReferences(mid)

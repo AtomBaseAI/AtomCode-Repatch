@@ -3,7 +3,7 @@ import BackBtn from "@/components/backbtn";
 import { getAssessmentById } from "@/data/assessments";
 import EditAssessment from "@/components/assessment/assessment-edit-form";
 
-const EditAssessmentx = async ({ params }: { params: Promise<{ aid: string> } }) => {
+const EditAssessmentx = async ({ params }: { params: Promise<{ aid: string}> }) => {
   const { aid } = await params;
   const assessment = await getAssessmentById(aid);
 

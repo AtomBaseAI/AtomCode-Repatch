@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
         hostname: "ik.imagekit.io",
         pathname: "**",
       },
+      {
+        // Wildcard: original student app allowed any https CDN (branding logos
+        // may point at arbitrary hosts). Prevents next/image crashes.
+        protocol: "https",
+        hostname: "**",
+      },
     ],
   },
 };

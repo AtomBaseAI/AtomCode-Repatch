@@ -13,6 +13,7 @@ export const addfeedback = async (values: z.infer<typeof AddFeedbackSchema>) => 
     })
 
     revalidatePath(`/admin/courses`)
+    revalidatePath(`/staff/courses`)
     return { success: "Feedback Added !" }
 }
 
@@ -29,6 +30,7 @@ export const updatefeedback = async (
         }
     })
     revalidatePath("/admin/courses")
+    revalidatePath("/staff/courses")
     return { success: "Feedback Updated !" }
 }
 
@@ -41,5 +43,6 @@ export const deletefeedback = async (
         }
     })
     revalidatePath("/admin/courses")
+    revalidatePath("/staff/courses")
     return { success: "Feedback Deleted !" }
 }

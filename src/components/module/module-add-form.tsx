@@ -48,7 +48,7 @@ type CData = {
 }
 const AddModule = ({ cdata }: { cdata: CData }) => {
 
-    const form = useForm<z.infer<typeof AddModuleSchema>>({
+    const form = useForm<z.input<typeof AddModuleSchema>, any, z.output<typeof AddModuleSchema>>({
         resolver: zodResolver(AddModuleSchema),
         defaultValues: {
             courseId: cdata.cid,
@@ -198,6 +198,7 @@ const AddModule = ({ cdata }: { cdata: CData }) => {
                                                     <FormControl>
                                                         <Input
                                                             {...field}
+                                                            value={field.value as string | number}
                                                             disabled={isLoading}
                                                             placeholder="50"
                                                             type="number"

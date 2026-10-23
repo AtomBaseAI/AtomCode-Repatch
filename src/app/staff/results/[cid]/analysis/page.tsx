@@ -5,7 +5,7 @@ import { getmoduleresults } from "@/data/analysis"
 import { ModuleAnalysisSchema } from "@/schemas/result-analysis-schema"
 import { getCourseById } from "@/data/courses"
 import { ModuleAnalysisDataTable } from "@/components/results/analysis/ma-data-table"
-import { columns } from "@/components/results/analysis/ma-columns"
+import { columns } from "@/components/staff/results/analysis/ma-columns"
 
 async function fetchModulesdata(cid: string) {
   const modules = await getmoduleresults(cid)

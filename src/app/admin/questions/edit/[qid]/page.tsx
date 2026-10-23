@@ -4,7 +4,7 @@ import EditQuestionForm from "@/components/question/question-edit-form"
 import { getQuestionById } from "@/data/questions"
 
 
-const EditQuestion = async ({ params }: { params: Promise<{ qid: string> } }) => {
+const EditQuestion = async ({ params }: { params: Promise<{ qid: string}> }) => {
 
     const { qid } = await params
     const question = await getQuestionById(qid)

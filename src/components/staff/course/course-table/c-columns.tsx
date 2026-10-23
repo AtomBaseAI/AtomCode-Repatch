@@ -6,7 +6,7 @@ import { CourseTableType } from "@/schemas/course-schema"
 import { format } from 'date-fns';
 import CModules from "@/components/staff/course/course-table/c-modules"
 import CStudents from "@/components/staff/course/course-table/c-students"
-import CFeedbacks from "@/components/course/course-table/c-feedbacks";
+import CFeedbacks from "@/components/staff/course/course-table/c-feedbacks";
 export const columns: ColumnDef<CourseTableType>[] = [
 
   {

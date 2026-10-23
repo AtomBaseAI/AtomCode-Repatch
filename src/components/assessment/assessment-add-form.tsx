@@ -30,7 +30,7 @@ const AddAssessment = ({ cdata }: { cdata: CData }) => {
   const [success, setSuccess] = useState<string | undefined>("")
   const [isLoading, startTransition] = useTransition()
 
-  const form = useForm<z.infer<typeof AddAssessmentSchema>>({
+  const form = useForm<z.input<typeof AddAssessmentSchema>, any, z.output<typeof AddAssessmentSchema>>({
     resolver: zodResolver(AddAssessmentSchema),
     defaultValues: {
       courseId: cdata.cid,

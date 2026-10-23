@@ -1,6 +1,11 @@
 "use server"
 import { db } from "@/lib/db";
 import { startUserAssessmentDataSchema, upateUserAllAssessmentSchemaCode, upateUserAssessmentSchemaMCQ, UserQuestionAssessmentDataSchema } from "@/schemas/student/assessment-schema";
+import {
+  AddAssessmentSchema,
+  DeleteAssessmentSchema,
+  UpdateAssessmentSchema,
+} from "@/schemas/assessment-schema";
 import { revalidatePath } from "next/cache";
 
 import * as z from 'zod';
@@ -171,6 +176,82 @@ export const submitassessmentallquestions = async (data: z.infer<typeof upateUse
   }),
     revalidatePath('/student/assessment');
   return { success: "Code Submitted" };
+}
+
+
+// Add Assessment
+export const addassessment = async (values: z.infer<typeof AddAssessmentSchema>) => {
+  await db.assessments.create({
+    data: {
+      ...values,
+    },
+  })
+
+  revalidatePath("/admin/courses")
+  return { success: "Assessment Added!" }
+}
+
+// Delete Assessment
+export const deleteassessment = async (values: z.infer<typeof DeleteAssessmentSchema>) => {
+  const aid = values.id
+  await db.assessments.delete({
+    where: {
+      id: aid,
+    },
+  })
+
+  revalidatePath("/admin/courses")
+  return { success: "Assessment Deleted!" }
+}
+
+// Update Assessment
+export const updateassessment = async (values: z.infer<typeof UpdateAssessmentSchema>) => {
+  const aid = values.id
+  await db.assessments.update({
+    where: {
+      id: aid,
+    },
+    data: {
+      ...values,
+    },
+  })
+
+  revalidatePath("/admin/courses")
+  return { success: "Assessment Updated!" }
+}
+
+// Optional: Add Questions to Assessment
+export const addassessmentquestions = async (assessmentId: string, questionIds: string[]) => {
+  await db.assessments.update({
+    where: {
+      id: assessmentId,
+    },
+    data: {
+      questions: {
+        connect: questionIds.map((id) => ({ id })),
+      },
+    },
+  })
+
+  revalidatePath("/admin/courses")
+  return { success: "Questions added to assessment successfully!" }
+}
+
+// Optional: Remove Question from Assessment
+export const deleteassessmentquestion = async (questionId: string, assessmentId: string) => {
+  await db.assessments.update({
+    where: {
+      id: assessmentId,
+    },
+    data: {
+      questions: {
+        disconnect: { id: questionId },
+      },
+    },
+  })
+
+  revalidatePath("/admin/courses")
+  return { success: "Question removed from assessment successfully!" }
 }
 
 

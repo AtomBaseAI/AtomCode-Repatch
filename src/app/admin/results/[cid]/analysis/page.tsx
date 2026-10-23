@@ -12,7 +12,7 @@ async function fetchModulesdata(cid: string) {
   return z.array(ModuleAnalysisSchema).parse(modules)
 }
 
-const CourseAnalysis = async ({ params }: { params: Promise<{ cid: string> } }) => {
+const CourseAnalysis = async ({ params }: { params: Promise<{ cid: string}> }) => {
   const { cid } = await params
   // const courseId = parseInt(cid, 10);
   const modules = await fetchModulesdata(cid)

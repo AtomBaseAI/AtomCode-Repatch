@@ -11,7 +11,7 @@ async function fetchFeedbacks(cid: string) {
     const feedbacks = await getAllFeedbacksByCourseId(cid)
     return z.array(FeedbackTableSchema).parse(feedbacks)
 }
-export default async function CourseFeedback({ params }: { params: Promise<{ cid: string> } }) {
+export default async function CourseFeedback({ params }: { params: Promise<{ cid: string}> }) {
     const { cid } = await params
     const feedbacks = await fetchFeedbacks(cid)
     const course = await getCourseById(cid)

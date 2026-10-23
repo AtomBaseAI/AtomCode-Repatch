@@ -19,7 +19,7 @@ async function fetchModuleMCQs(mid: string) {
     return modulex
 }
 
-const ViewModule = async ({ params }: { params: Promise<{ cid: string; mid: string> } }) => {
+const ViewModule = async ({ params }: { params: Promise<{ cid: string; mid: string}> }) => {
     const { cid, mid } = await params
     // const moduleId = parseInt(mid, 10);
     const modulez = await fetchModule(mid)

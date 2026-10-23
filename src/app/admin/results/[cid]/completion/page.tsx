@@ -6,7 +6,7 @@ import { ResultTableStudentType } from '@/schemas/result-matrix-schema';
 import React from 'react'
 import CompletionExportButton from '@/export/result-export/completion-export-button';
 
-const CourseCompletion = async ({ params }: { params: Promise<{ cid: string> } }) => {
+const CourseCompletion = async ({ params }: { params: Promise<{ cid: string}> }) => {
   const { cid } = await params
   const CourseCompletionDatax = await courseCompletionData(cid)
   if (CourseCompletionDatax === null) {

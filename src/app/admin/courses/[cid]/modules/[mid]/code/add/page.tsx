@@ -27,7 +27,7 @@ async function fetchQestoinbyLang(lang: string) {
     const langquestions = await getAllQuestionsByLang(lang)
     return langquestions;
 }
-const AddModuleQuestions = async ({ params }: { params: Promise<{ cid: string; mid: string> } }) => {
+const AddModuleQuestions = async ({ params }: { params: Promise<{ cid: string; mid: string}> }) => {
     const { cid, mid } = await params
     const modulez = await fetchModule(mid)
     const moduleq = await fetchmodulequestions(mid)

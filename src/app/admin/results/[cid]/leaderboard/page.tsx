@@ -4,7 +4,7 @@ import { RankAnimation } from "@/components/results/leaderboard/rank-animations"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { leaderboardData } from "@/data/results"
 
-const CourseLeaderboard = async ({ params }: { params: Promise<{ cid: string> } }) => {
+const CourseLeaderboard = async ({ params }: { params: Promise<{ cid: string}> }) => {
     const { cid } = await params
     // const courseid = parseInt(cid, 10)
     const LeaderboardDatax = await leaderboardData(cid)

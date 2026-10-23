@@ -17,7 +17,7 @@ async function fetchAssessmentQuestions(aid: string) {
   return ax
 }
 
-const AssessmentCode = async ({ params }: { params: Promise<{ cid: string; aid: string> } }) => {
+const AssessmentCode = async ({ params }: { params: Promise<{ cid: string; aid: string}> }) => {
   const { cid, aid } = await params
   // const moduleId = parseInt(mid, 10);
   const az = await fetchAssessment(aid)

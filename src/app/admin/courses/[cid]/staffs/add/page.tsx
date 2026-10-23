@@ -19,7 +19,7 @@ async function fetchAllStaffs() {
     const staffs = await getAllStaffs()
     return z.array(StaffTableSchema).parse(staffs)
 }
-const CourseStaffsAdd = async ({ params }: { params: Promise<{ cid: string> } }) => {
+const CourseStaffsAdd = async ({ params }: { params: Promise<{ cid: string}> }) => {
     const { cid } = await params
     const coursestaffs = await fetchStaffs(cid)
     const allstaffs = await fetchAllStaffs()

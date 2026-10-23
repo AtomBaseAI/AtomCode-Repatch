@@ -53,7 +53,7 @@ const Sidebar = () => {
       <div className="flex-grow flex flex-col justify-between">
         <nav className="flex flex-col my-4 space-y-4">
 
-          <span onClick={() => router.push("/admin/dashboard")} className={`inline-flex items-center justify-center py-3 transition-colors cursor-pointer ${isActive('/dashboard') ? 'text-primary border-l-4 border-primary' : ''}`}>
+          <span onClick={() => router.push("/admin/dashboard")} className={`inline-flex items-center justify-center py-3 transition-colors cursor-pointer ${isActive('/admin/dashboard') ? 'text-primary border-l-4 border-primary' : ''}`}>
             <span className='h-6 w-6'>
               <LayoutDashboard fill='none' />
             </span>
@@ -62,7 +62,7 @@ const Sidebar = () => {
           <TooltipProvider>
             <Tooltip >
               <TooltipTrigger asChild>
-                <span onClick={() => router.push("/admin/questions")} className={`inline-flex items-center justify-center py-3 transition-colors cursor-pointer  ${isActive('/questions') ? 'text-primary border-l-4 border-primary' : ''}`}>
+                <span onClick={() => router.push("/admin/questions")} className={`inline-flex items-center justify-center py-3 transition-colors cursor-pointer  ${isActive('/admin/questions') ? 'text-primary border-l-4 border-primary' : ''}`}>
                   <span className='h-6 w-6'>
                     <Package fill='none' />
                   </span>
@@ -77,7 +77,7 @@ const Sidebar = () => {
           <TooltipProvider>
             <Tooltip >
               <TooltipTrigger asChild>
-                <span onClick={() => router.push("/admin/courses")} className={`inline-flex items-center justify-center py-3 transition-colors cursor-pointer  ${isActive('/courses') ? 'text-primary border-l-4 border-primary' : ''}`}>
+                <span onClick={() => router.push("/admin/courses")} className={`inline-flex items-center justify-center py-3 transition-colors cursor-pointer  ${isActive('/admin/courses') ? 'text-primary border-l-4 border-primary' : ''}`}>
                   <span className='h-6 w-6'>
                     <Layers fill='none' />
                   </span>
@@ -93,7 +93,7 @@ const Sidebar = () => {
           <TooltipProvider>
             <Tooltip >
               <TooltipTrigger asChild>
-                <span onClick={() => router.push("/admin/staffs")} className={`inline-flex items-center justify-center py-3 transition-colors cursor-pointer ${isActive('/staffs') ? 'text-primary border-l-4 border-primary' : ''}`}>
+                <span onClick={() => router.push("/admin/staffs")} className={`inline-flex items-center justify-center py-3 transition-colors cursor-pointer ${isActive('/admin/staffs') ? 'text-primary border-l-4 border-primary' : ''}`}>
                   <span className='h-6 w-6'>
                     <ShipWheel fill='none' />
                   </span>
@@ -108,7 +108,7 @@ const Sidebar = () => {
           <TooltipProvider>
             <Tooltip >
               <TooltipTrigger asChild>
-                <span onClick={() => router.push("/admin/students")} className={`inline-flex items-center justify-center py-3 transition-colors cursor-pointer ${isActive('/students') ? 'text-primary border-l-4 border-primary' : ''}`}>
+                <span onClick={() => router.push("/admin/students")} className={`inline-flex items-center justify-center py-3 transition-colors cursor-pointer ${isActive('/admin/students') ? 'text-primary border-l-4 border-primary' : ''}`}>
                   <span className='h-6 w-6'>
                     <Users fill='none' />
                   </span>
@@ -122,7 +122,7 @@ const Sidebar = () => {
           <TooltipProvider>
             <Tooltip >
               <TooltipTrigger asChild>
-                <span onClick={() => router.push("/admin/results")} className={`inline-flex items-center justify-center py-3 transition-colors cursor-pointer ${isActive('/results') ? 'text-primary border-l-4 border-primary' : ''}`}>
+                <span onClick={() => router.push("/admin/results")} className={`inline-flex items-center justify-center py-3 transition-colors cursor-pointer ${isActive('/admin/results') ? 'text-primary border-l-4 border-primary' : ''}`}>
                   <span className='h-6 w-6'>
                     <PieChart fill='none' />
                   </span>
@@ -136,7 +136,7 @@ const Sidebar = () => {
           <TooltipProvider>
             <Tooltip >
               <TooltipTrigger asChild>
-                <span onClick={() => router.push("/admin/ide")} className={`inline-flex items-center justify-center py-3 transition-colors cursor-pointer ${isActive('/ide') ? 'text-primary border-l-4 border-primary' : ''}`}>
+                <span onClick={() => router.push("/admin/ide")} className={`inline-flex items-center justify-center py-3 transition-colors cursor-pointer ${isActive('/admin/ide') ? 'text-primary border-l-4 border-primary' : ''}`}>
                   <span className='h-6 w-6'>
                     <Code2 fill='none' />
                   </span>
@@ -192,7 +192,7 @@ const Sidebar = () => {
           <TooltipProvider>
             <Tooltip >
               <TooltipTrigger asChild>
-                <span onClick={() => router.push('/settings')} className={`inline-flex items-center justify-center py-3 my-1 w-full transition-colors  cursor-pointer ${isActive('/settings') ? 'text-primary border-l-4 border-primary' : ''}`}>
+                <span onClick={() => router.push('/admin/settings')} className={`inline-flex items-center justify-center py-3 my-1 w-full transition-colors  cursor-pointer ${isActive('/admin/settings') ? 'text-primary border-l-4 border-primary' : ''}`}>
                   <span className='h-6 w-6'>
                     <Settings fill='none' />
                   </span>

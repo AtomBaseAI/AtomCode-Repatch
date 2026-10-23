@@ -20,7 +20,7 @@ async function fetchAllStudents() {
     const students = await getAllStudents()
     return z.array(StudentTableSchema).parse(students)
 }
-const CourseStudentsAdd = async ({ params }: { params: Promise<{ cid: string> } }) => {
+const CourseStudentsAdd = async ({ params }: { params: Promise<{ cid: string}> }) => {
     const { cid } = await params
     // const courseId = parseInt(cid, 10);
     const coursestudents = await fetchStudents(cid)

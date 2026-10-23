@@ -9,7 +9,7 @@ export const AddFeedbackSchema = z.object({
         message: "Feedback link is required"
     }),
     date: z.date({
-        required_error: "Feedback date is required"
+        message: "Feedback date is required"
     }),
 
 });

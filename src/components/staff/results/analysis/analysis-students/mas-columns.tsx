@@ -4,7 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { DataTableColumnHeader } from "@/components/data-tables/data-table-column-header"
 import { format } from 'date-fns';
 import { ResultAnalysisStudentType } from "@/schemas/result-analysis-schema";
-import MASView from "@/components/results/analysis/analysis-students/mas-view";
+import MASView from "@/components/staff/results/analysis/analysis-students/mas-view";
 import { bathces, departments, modulefilters, sections } from "@/components/data-tables/data-table-config-data";
 import { LucideBarChartHorizontalBig } from "lucide-react";
 import { Button } from "@/components/ui/button";

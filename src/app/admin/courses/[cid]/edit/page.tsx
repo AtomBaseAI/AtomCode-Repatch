@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import EditCourseForm from "@/components/course/course-edit-form";
 import BackBtn from "@/components/backbtn";
 
-const EditCourse = async ({ params }: { params: Promise<{ cid: string> } }) => {
+const EditCourse = async ({ params }: { params: Promise<{ cid: string}> }) => {
 
     const { cid } = await params
     const course = await getCourseById(cid)

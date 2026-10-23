@@ -13,7 +13,7 @@ async function fetchAssessments(cid: string) {
     const assessments = await getAllAssessmentsByCourseId(cid)
     return z.array(AssessmentTableSchema).parse(assessments)
 }
-export default async function AssessmentsData({ params }: { params: Promise<{ cid: string> } }) {
+export default async function AssessmentsData({ params }: { params: Promise<{ cid: string}> }) {
     const { cid } = await params
     const assessments = await fetchAssessments(cid)
     const course = await getCourseById(cid)

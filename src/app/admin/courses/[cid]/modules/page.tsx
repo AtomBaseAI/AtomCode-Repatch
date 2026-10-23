@@ -11,7 +11,7 @@ async function fetchModules(cid: string) {
     const modules = await getAllModulesByCourseId(cid)
     return z.array(ModuleTableSchema).parse(modules)
 }
-export default async function ModulesData({ params }: { params: Promise<{ cid: string> } }) {
+export default async function ModulesData({ params }: { params: Promise<{ cid: string}> }) {
     const { cid } = await params
     const modules = await fetchModules(cid)
     const course = await getCourseById(cid)

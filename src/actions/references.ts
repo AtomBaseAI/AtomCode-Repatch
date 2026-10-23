@@ -12,6 +12,7 @@ export const addmodulereference = async (values: z.infer<typeof AddModuleReferen
     })
 
     revalidatePath(`/admin/courses`)
+    revalidatePath(`/staff/courses`)
     return { success: "Reference Added !" }
 }
 
@@ -28,6 +29,7 @@ export const updatemodulereference = async (
         }
     })
     revalidatePath("/admin/courses")
+    revalidatePath("/staff/courses")
     return { success: "Reference Updated !" }
 }
 
@@ -40,5 +42,6 @@ export const deletemodulereference = async (
         }
     })
     revalidatePath("/admin/courses")
+    revalidatePath("/staff/courses")
     return { success: "Reference Deleted !" }
 }

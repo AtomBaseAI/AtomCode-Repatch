@@ -37,7 +37,7 @@ const EditAssessment = ({ data }: { data: AssessmentData }) => {
     const [success, setSuccess] = useState<string | undefined>("")
     const [isLoading, startTransition] = useTransition()
 
-    const form = useForm<z.infer<typeof UpdateAssessmentSchema>>({
+    const form = useForm<z.input<typeof UpdateAssessmentSchema>, any, z.output<typeof UpdateAssessmentSchema>>({
         resolver: zodResolver(UpdateAssessmentSchema),
         defaultValues: {
             ...data,

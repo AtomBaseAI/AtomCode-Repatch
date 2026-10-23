@@ -53,7 +53,7 @@ type moduleData = {
 }
 const EditModule = ({ modulez }: { modulez: moduleData }) => {
 
-    const form = useForm<z.infer<typeof ModuleUpdateSchema>>({
+    const form = useForm<z.input<typeof ModuleUpdateSchema>, any, z.output<typeof ModuleUpdateSchema>>({
         resolver: zodResolver(ModuleUpdateSchema),
         defaultValues: {
             id: modulez.id,
@@ -202,6 +202,7 @@ const EditModule = ({ modulez }: { modulez: moduleData }) => {
                                                     <FormControl>
                                                         <Input
                                                             {...field}
+                                                            value={field.value as string | number}
                                                             disabled={isLoading}
                                                             placeholder="50"
                                                             type="number"

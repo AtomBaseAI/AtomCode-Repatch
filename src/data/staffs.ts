@@ -27,5 +27,14 @@ export const getStaffsCount = () => {
         return null
     }
 }
+export const getStaffByEmail= async (email: string) => {
+    try {
+        const staff = await db.staff.findUnique({ where: { email } })
+        return staff
+    }
+    catch {
+        return null
+    }
+}
 
 

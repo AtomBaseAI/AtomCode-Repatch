@@ -52,6 +52,7 @@ export const resetModuleForStudent = async (
     }
 
     revalidatePath("/admin/results");
+    revalidatePath("/staff/results");
 
     return { success: "Module reset successfully" };
 };

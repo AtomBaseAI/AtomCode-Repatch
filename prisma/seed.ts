@@ -47,6 +47,61 @@ async function main() {
     },
   });
 
+  // --- extra sample accounts (all roles) for testing ---
+  await db.admin.upsert({
+    where: { email: "admin2@atom.com" },
+    update: {},
+    create: {
+      name: "Backup Admin",
+      email: "admin2@atom.com",
+      password: hash("Admin@Atom"),
+    },
+  });
+
+  // Staff #2 — deliberately NOT enrolled in any course (tests empty states).
+  await db.staff.upsert({
+    where: { email: "staff2@atom.com" },
+    update: {},
+    create: {
+      name: "Priya Staff",
+      email: "staff2@atom.com",
+      department: "cse",
+      staffnumber: "STF002",
+      phone: "9876543211",
+      password: hash("Staff@Atom"),
+    },
+  });
+
+  // Student #2 — enrolled below so the leaderboard has 2+ students.
+  const student2 = await db.user.upsert({
+    where: { email: "student2@atom.com" },
+    update: {},
+    create: {
+      name: "Arjun Student",
+      email: "student2@atom.com",
+      department: "cse",
+      section: "a",
+      batch: "2023-2027",
+      rollnumber: "21CS002",
+      password: hash("User@Atom"),
+    },
+  });
+
+  // Student #3 — deliberately NOT enrolled (tests empty states).
+  await db.user.upsert({
+    where: { email: "student3@atom.com" },
+    update: {},
+    create: {
+      name: "Kiran Student",
+      email: "student3@atom.com",
+      department: "it",
+      section: "b",
+      batch: "2023-2027",
+      rollnumber: "21IT001",
+      password: hash("User@Atom"),
+    },
+  });
+
   const now = new Date();
   const course =
     (await db.course.findFirst({ where: { title: "Full Stack Java" } })) ??
@@ -83,6 +138,27 @@ async function main() {
     await db.userCourse.create({
       data: {
         userId: student.id,
+        courseId: course.id,
+        active: true,
+        completionPercentage: 0,
+      },
+    });
+  });
+
+  await db.userCourse.upsert({
+    where: { id: "seed-uc-2" },
+    update: {},
+    create: {
+      id: "seed-uc-2",
+      userId: student2.id,
+      courseId: course.id,
+      active: true,
+      completionPercentage: 0,
+    },
+  }).catch(async () => {
+    await db.userCourse.create({
+      data: {
+        userId: student2.id,
         courseId: course.id,
         active: true,
         completionPercentage: 0,
@@ -289,10 +365,14 @@ async function main() {
   }).catch(() => {});
 
   console.log("Seed complete:");
-  console.log("  admin   → admin@atom.com / Admin@Atom");
-  console.log("  staff   → staff@atom.com / Staff@Atom");
-  console.log("  student → student@atom.com / User@Atom");
-  console.log(`  course  → ${course.title} (${course.id})`);
+  console.log("  admin    → admin@atom.com / Admin@Atom");
+  console.log("  admin2   → admin2@atom.com / Admin@Atom");
+  console.log("  staff    → staff@atom.com / Staff@Atom");
+  console.log("  staff2   → staff2@atom.com / Staff@Atom");
+  console.log("  student  → student@atom.com / User@Atom");
+  console.log("  student2 → student2@atom.com / User@Atom");
+  console.log("  student3 → student3@atom.com / User@Atom");
+  console.log(`  course   → ${course.title} (${course.id})`);
 }
 
 main()

@@ -3,7 +3,7 @@ import EditStaffForm from "@/components/staff/staff-edit-form"
 import ResetPasswordStaff from "@/components/staff/staff-reset-model"
 import { getStaffById } from "@/data/staffs"
 
-const EditStudent = async ({ params }: { params: Promise<{ sid: string> } }) => {
+const EditStudent = async ({ params }: { params: Promise<{ sid: string}> }) => {
 
     const { sid } = await params
     const staff = await getStaffById(sid)

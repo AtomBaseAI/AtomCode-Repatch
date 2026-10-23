@@ -4,7 +4,7 @@ import ResetPasswordStudent from "@/components/student/student-reset-model"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getStudentById } from "@/data/students"
 
-const EditStudent = async ({ params }: { params: Promise<{ uid: string> } }) => {
+const EditStudent = async ({ params }: { params: Promise<{ uid: string}> }) => {
 
     const { uid } = await params
     const student = await getStudentById(uid)

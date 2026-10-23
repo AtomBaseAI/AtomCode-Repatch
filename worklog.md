@@ -135,3 +135,29 @@ Work Log:
 
 Stage Summary:
 - Foundation complete and browser-verified. Phase 3 starting: 3 parallel porting agents (admin/staff/student areas) with strict file-ownership partitions.
+
+---
+
+Task ID: 5-8 (session 2 completion)
+Agent: main (orchestrator) + 3 diff agents + 3 impl agents
+Task: Scan Core_SRC for pending/missing features, fix all gaps, verify build+runtime, produce test credentials.
+
+Work Log:
+- Re-cloned repo (workspace was reset), reinstalled deps (bun, 854 pkgs)
+- Fixed 6 mangled route dirs (id] -> [mid]) in admin/staff/student app trees
+- 3 parallel Explore agents diffed Core_SRC Admin/Staff/Student vs src/:
+  * ADMIN: 25 pages had malformed awaited-params types (Promise<{...> } -> fixed via script); src/actions/assessment.ts had lost the 5 admin CRUD exports (addassessment, deleteassessment, updateassessment, addassessmentquestions, deleteassessmentquestion) -> restored; sidebar isActive legacy paths + /settings -> /admin/settings fixed
+  * STAFF: shared components hardcoded /admin/... drill-downs -> created 7 staff variants (m-codeview, m-mcqview, m-references, ma-view, mas-view, c-feedbacks, ma-columns) + repointed staff column imports; dual revalidatePath (/admin + /staff) in references/feedbacks/analysis actions; getStaffByEmail restored in data/staffs.ts
+  * STUDENT: no missing pages/actions/data/schemas; verified IDE (localStorage drafts, copy/paste block, lambda URLs), accesskey flow, proctor layouts, AI tutor intact
+- Fixed leftover staff analysis page import -> staff ma-columns variant
+- Type-error cleanup: 0 TS errors (auth route handlers export, results.ts parts typing, feedback schema zod v4 message, 4 forms useForm 3-generic zod v4 pattern, coerce input cast, tsconfig excludes Core_SRC + examples)
+- .env + .env.example: 7 essentials (DATABASE_URL, AUTH_SECRET, LAMBDA x2, OPENAI x2) ; next.config images wildcard; forgot-password stub; .gitignore created
+- Seed expanded: 2 admins, 2 staff, 3 students, enrollments (staff2/student3 unenrolled for empty-state tests); re-seeded, sqlite verified
+- Production build: SUCCESS (all routes compile, standalone output)
+- Runtime E2E (dev server): 7/7 logins -> role homes; bad password rejected (CredentialsSignin); cross-role guards 307; anon guards 307; logged-in /login -> role home; 59/59 valid pages 200 across admin(31)/staff(18)/student(10)
+- Note: /student/courses/[course] has no page in ORIGINAL either (layout+module only) - faithful parity
+- Note: parent workspace .env had stale DATABASE_URL (overrode repo .env via shell export) - repointed to repo db
+- Credentials doc: download/TEST-CREDENTIALS.md + docs/TEST-CREDENTIALS.md (7 accounts, accesskey 123456, env essentials)
+
+Stage Summary:
+- Session 2 COMPLETE. All Core_SRC features ported/verified; build green; runtime auth+pages green; test credentials for all roles delivered.

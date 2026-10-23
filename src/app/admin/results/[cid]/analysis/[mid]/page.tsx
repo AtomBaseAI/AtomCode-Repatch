@@ -11,7 +11,7 @@ async function fetchResultAnalysisStudents(cid: string, mid: string) {
     // console.log(resultdata)
     return z.array(ResultAnalysisStudentSchema).parse(resultdata)
 }
-const ResultAnalysisStudents = async ({ params }: { params: Promise<{ cid: string; mid: string> } }) => {
+const ResultAnalysisStudents = async ({ params }: { params: Promise<{ cid: string; mid: string}> }) => {
     const { cid, mid } = await params
     // const moduleId = parseInt(mid, 10);
     // const courseId = parseInt(cid, 10);

@@ -6,7 +6,7 @@ import BackBtn from "@/components/backbtn";
 import { getModuleById } from "@/data/modules";
 import EditModule from "@/components/module/module-edit-form";
 
-const EditModulex = async ({ params }: { params: Promise<{ mid: string> } }) => {
+const EditModulex = async ({ params }: { params: Promise<{ mid: string}> }) => {
 
   const { mid } = await params
   // const moduleId = parseInt(mid, 10);

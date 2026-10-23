@@ -1,12 +1,55 @@
 import { db } from "@/lib/db";
 
+// Completion-matrix types (consolidated here from the removed
+// src/schemas/result-completion-schema.ts — results.ts is their only consumer)
+interface ModuleData {
+  modulename: string;
+  mcqscore: number;
+  codescore: number;
+  totalscore: number;
+  errors: number;
+  compiles: number;
+  time: number;
+  maxscore: number;
+}
+
+interface UserAggregate {
+  userId: string;
+  rollnumber: string | null;
+  name: string | null;
+  totalModules: number;
+  totalScore: number;
+  mcqScore: number;
+  codeScore: number;
+  totalTime: number;
+  totalErrors: number;
+  totalCompiles: number;
+  rank?: number;
+}
+
+interface StudentData {
+  studentname: string | null;
+  rollnumber: string | null;
+  department: string | null;
+  batch: string | null;
+  section: string | null;
+  email: string;
+  completionpercentage: number;
+  moduledata: ModuleData[];
+}
+
+interface CourseCompletionData {
+  coursename: string;
+  totalmodules: number;
+  data: StudentData[];
+}
 
 const formatTime = (totalSeconds: number) => {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
-  const parts = [];
+  const parts: string[] = [];
   if (hours > 0) {
     parts.push(`${hours}h`);
   }

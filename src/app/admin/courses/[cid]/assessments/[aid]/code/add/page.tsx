@@ -23,7 +23,7 @@ async function fetchQestoinbyLang(lang: string) {
     const langquestions = await getAllQuestionsByLang(lang)
     return langquestions;
 }
-const AddAssessmentQuestions = async ({ params }: { params: Promise<{ cid: string; aid: string> } }) => {
+const AddAssessmentQuestions = async ({ params }: { params: Promise<{ cid: string; aid: string}> }) => {
     const { cid, aid } = await params
     const assessmentz = await fetchAssessment(aid)
     const assessmentq = await fetchassessmentquestions(aid)
