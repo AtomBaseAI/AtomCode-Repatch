@@ -79,6 +79,8 @@ model Feedbacks {
   link     String
   date     DateTime
   Course   Course?  @relation(fields: [courseId], references: [id])
+
+  @@index([courseId])
 }
 
 model Module {
@@ -97,6 +99,8 @@ model Module {
   userMCQData      UserMCQData[]
   userQuestionData UserQuestionData[]
   reference        ModuleReferences[]
+
+  @@index([courseId])
 }
 
 model ModuleReferences {
@@ -106,6 +110,8 @@ model ModuleReferences {
   type     String
   Module   Module? @relation(fields: [moduleId], references: [id])
   moduleId String?
+
+  @@index([moduleId])
 }
 
 model UserModuleData {
@@ -128,6 +134,10 @@ model UserModuleData {
   user               User    @relation(fields: [userId], references: [id])
   course             Course  @relation(fields: [courseId], references: [id])
   module             Module  @relation(fields: [moduleId], references: [id])
+
+  @@index([userId, courseId, moduleId])
+  @@index([courseId])
+  @@index([moduleId])
 }
 
 model Question {
@@ -160,6 +170,9 @@ model Question {
   userAssessmentCodeData userAssessmentCodeData[]
   Assessments            Assessments?             @relation(fields: [assessmentsId], references: [id])
   assessmentsId          String?
+
+  @@index([moduleId])
+  @@index([assessmentsId])
 }
 
 model UserQuestionData {
@@ -183,6 +196,8 @@ model UserQuestionData {
   module          Module   @relation(fields: [moduleId], references: [id])
 
   @@unique([userId, questionId])
+  @@index([moduleId])
+  @@index([userId, moduleId])
 }
 
 model MCQQuestion {
@@ -203,6 +218,9 @@ model MCQQuestion {
   module        Module?      @relation(fields: [moduleId], references: [id])
   Assessments   Assessments? @relation(fields: [assessmentsId], references: [id])
   assessmentsId String?
+
+  @@index([moduleId])
+  @@index([assessmentsId])
 }
 
 model UserMCQData {
@@ -217,6 +235,9 @@ model UserMCQData {
   duration       String?
   user           User    @relation(fields: [userId], references: [id])
   module         Module  @relation(fields: [moduleId], references: [id])
+
+  @@index([userId, moduleId])
+  @@index([moduleId])
 }
 
 model StaffCourse {
@@ -226,6 +247,9 @@ model StaffCourse {
   active   Boolean
   staff    Staff   @relation(fields: [staffId], references: [id])
   course   Course  @relation(fields: [courseId], references: [id])
+
+  @@index([staffId])
+  @@index([courseId])
 }
 
 model UserCourse {
@@ -236,6 +260,9 @@ model UserCourse {
   completionPercentage Float
   user                 User    @relation(fields: [userId], references: [id])
   course               Course  @relation(fields: [courseId], references: [id])
+
+  @@index([userId])
+  @@index([courseId])
 }
 
 model Assessments {
@@ -255,6 +282,8 @@ model Assessments {
   UserAssessmentData     UserAssessmentData[]
   userAssessmentMCQData  userAssessmentMCQData[]
   userAssessmentCodeData userAssessmentCodeData[]
+
+  @@index([courseId])
 }
 
 model userAssessmentMCQData {
@@ -268,6 +297,9 @@ model userAssessmentMCQData {
   duration       String?
   user           User        @relation(fields: [userId], references: [id])
   assessments    Assessments @relation(fields: [assessmentId], references: [id])
+
+  @@index([userId, assessmentId])
+  @@index([assessmentId])
 }
 
 model userAssessmentCodeData {
@@ -290,6 +322,8 @@ model userAssessmentCodeData {
   assessments     Assessments @relation(fields: [assessmentId], references: [id])
 
   @@unique([userId, questionId])
+  @@index([assessmentId])
+  @@index([userId, assessmentId])
 }
 
 model UserAssessmentData {
@@ -319,4 +353,9 @@ model UserAssessmentData {
   user                    User        @relation(fields: [userId], references: [id])
   course                  Course      @relation(fields: [courseId], references: [id])
   assessments             Assessments @relation(fields: [assessmentId], references: [id])
+
+  @@index([userId])
+  @@index([assessmentId])
+  @@index([userId, assessmentId])
+  @@index([courseId])
 }

@@ -20,8 +20,8 @@ const ResultAnalysisStudents = async ({ params }: { params: Promise<{ cid: strin
     const titles = await getCourseModuleTitlesByModuleId(mid);
     return (
         <>
-            <div className="hidden h-full flex-1 flex-col space-y-2 p-8 md:flex w-full">
-                <div className="flex items-center justify-between space-y-2">
+            <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
+                <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight">
                             {titles?.moduleTitle}

@@ -71,7 +71,7 @@ export function ModuleReferenceDataTable<TData, TValue>({
   return (
     <div className="space-y-4">
       <RDataTableToolbar table={table} />
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

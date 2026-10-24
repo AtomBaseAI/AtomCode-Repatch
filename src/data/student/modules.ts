@@ -7,10 +7,26 @@ export const getAllModulesByCourseId = async (id: string) => {
                 courseId: id,
                 modulestatus: "active",
             },
-            include: {
-                questions: true,
-                mcqQuestions: true,
-                reference: true,
+            select: {
+                id: true,
+                title: true,
+                modulestatus: true,
+                moduledate: true,
+                maxscore: true,
+                concepturl: true,
+                _count: {
+                    select: {
+                        questions: true,
+                        mcqQuestions: true,
+                    },
+                },
+                reference: {
+                    select: {
+                        title: true,
+                        link: true,
+                        type: true,
+                    },
+                },
             },
         });
 
@@ -21,13 +37,9 @@ export const getAllModulesByCourseId = async (id: string) => {
             moduledate: module.moduledate,
             concepturl: module.concepturl,
             maxscore: module.maxscore,
-            questionscount: module.questions.length,
-            mcqcount: module.mcqQuestions.length,
-            modulereference: module.reference.map(ref => ({
-                title: ref.title,
-                link: ref.link,
-                type: ref.type,
-            })),
+            questionscount: module._count.questions,
+            mcqcount: module._count.mcqQuestions,
+            modulereference: module.reference,
         }));
 
         return modules;

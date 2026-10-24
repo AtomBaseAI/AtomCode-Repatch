@@ -5,10 +5,24 @@ export const getAllAssessmentsByCourseId = async (courseId: string) => {
     try {
         const assessmentsData = await db.assessments.findMany({
             where: { courseId },
-            include: {
-                mcqQuestions: true,
-                questions: true
-            }
+            select: {
+                id: true,
+                title: true,
+                date: true,
+                accesskey: true,
+                language: true,
+                maxtime: true,
+                active: true,
+                maxscore: true,
+                tabswitches: true,
+                courseId: true,
+                _count: {
+                    select: {
+                        mcqQuestions: true,
+                        questions: true,
+                    },
+                },
+            },
         });
 
         const assessments = assessmentsData.map(assessment => {
@@ -20,8 +34,8 @@ export const getAllAssessmentsByCourseId = async (courseId: string) => {
 
             return {
                 ...assessment,
-                mcqcount: assessment.mcqQuestions.length,
-                codecount: assessment.questions.length,
+                mcqcount: assessment._count.mcqQuestions,
+                codecount: assessment._count.questions,
                 starttime // Add the new field
             };
         });

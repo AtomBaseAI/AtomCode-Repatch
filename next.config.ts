@@ -6,6 +6,21 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
+  // Sandbox preview gateway rewrites `x-forwarded-host` (outer fcapp.run host)
+  // while the browser `origin` stays the preview-chat domain. Next.js Server
+  // Actions reject that mismatch unless the origin is explicitly allowed.
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        "*.space-z.ai",
+        "preview-chat-1945cbd9-55db-4b00-b567-bac737eb3797.space-z.ai",
+        "localhost:3000",
+        "127.0.0.1:3000",
+        "ws-fa-ebff-ceda-mdomjldeyy.cn-hongkong-vpc.fcapp.run",
+        "*.cn-hongkong-vpc.fcapp.run",
+      ],
+    },
+  },
   images: {
     remotePatterns: [
       {

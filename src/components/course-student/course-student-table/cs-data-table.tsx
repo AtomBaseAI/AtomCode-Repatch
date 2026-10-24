@@ -68,7 +68,7 @@ export function CourseStudentDataTable<TData, TValue>({
   return (
     <div className="space-y-4">
       <CSDataTableToolbar table={table} />
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

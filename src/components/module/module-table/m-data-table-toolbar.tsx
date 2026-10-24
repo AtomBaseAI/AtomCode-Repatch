@@ -18,7 +18,7 @@ export function MDataTableToolbar<TData>({
 
   return (
     <div className="flex items-center justify-between">
-      <div className="flex flex-1 items-center space-x-2">
+      <div className="flex flex-1 flex-wrap items-center gap-2">
         <Input
           placeholder="Filter Modules"
           value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}

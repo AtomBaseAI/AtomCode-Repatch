@@ -24,7 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { DataTablePagination } from "@/components/data-tables/data-table-pagination"
-import { CSDataTableToolbar } from "@/components/course-student/course-student-table/cs-data-table-toolbar"
+import { CSTFDataTableToolbar } from "@/components/course-staff/course-staff-table/cstf-data-table-toolbar"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -67,8 +67,8 @@ export function CourseStaffDataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <CSDataTableToolbar table={table} />
-      <div className="rounded-md border">
+      <CSTFDataTableToolbar table={table} />
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

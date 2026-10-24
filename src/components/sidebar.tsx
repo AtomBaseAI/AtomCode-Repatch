@@ -49,7 +49,7 @@ const Sidebar = () => {
   const isActive = (path: string) => pathname.startsWith(path)
 
   return (
-    <aside className="sticky top-0 left-0 z-50 hidden sm:flex sm:flex-col w-20 h-screen border-r border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg">
+    <aside className="sticky top-0 left-0 z-50 flex flex-col w-14 sm:w-20 h-screen border-r border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg">
       <div className="flex-grow flex flex-col justify-between">
         <nav className="flex flex-col my-4 space-y-4">
 

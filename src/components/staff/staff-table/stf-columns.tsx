@@ -118,34 +118,6 @@ export const columns: ColumnDef<StaffTableType>[] = [
       return value.includes(row.getValue(id))
     },
   },
-
-  {
-    accessorKey: "department",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} name="Department" />
-    ),
-    cell: ({ row }) => {
-      const department = departments.find(
-        (department) => department.value === row.getValue("department")
-      )
-
-      if (!department) {
-        return null
-      }
-
-      return (
-        <div className="flex max-w-[130px] items-center">
-          {department.icon && (
-            <department.icon className="mr-2 h-4 w-4 text-muted-foreground" />
-          )}
-          <span>{department.label}</span>
-        </div>
-      )
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
-    },
-  },
   {
     accessorKey: "id",
     header: ({ column }) => (

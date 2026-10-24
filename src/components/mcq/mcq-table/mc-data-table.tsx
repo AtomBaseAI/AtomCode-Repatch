@@ -71,7 +71,7 @@ export function MCQDataTable<TData, TValue>({
   return (
     <div className="space-y-4">
       <MCQDataTableToolbar table={table} />
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

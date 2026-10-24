@@ -48,14 +48,22 @@ export const getCourseById = async (id: string) => {
     try {
         const course = await db.course.findUnique({
             where: { id },
-            include: { modules: true, },
+            select: {
+                id: true,
+                title: true,
+                startdate: true,
+                enddate: true,
+                _count: {
+                    select: { modules: true },
+                },
+            },
         },)
         const courseData = {
             id: course?.id,
             title: course?.title,
             starDate: formatDate(`${course?.startdate}`),
             endDate: formatDate(`${course?.enddate}`),
-            modelules: course?.modules.length,
+            modelules: course?._count.modules,
         }
         return courseData
     }

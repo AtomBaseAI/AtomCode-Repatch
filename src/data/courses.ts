@@ -8,17 +8,26 @@ interface CourseWithCounts {
 export const getAllCourses = async (): Promise<CourseWithCounts[]> => {
     try {
         const courses = await db.course.findMany({
-            include: {
-                modules: true,
-                assessments: true,
+            select: {
+                id: true,
+                title: true,
+                startdate: true,
+                enddate: true,
+                language: true,
+                _count: {
+                    select: {
+                        modules: true,
+                        assessments: true,
+                    },
+                },
             },
         });
 
         const coursesWithCounts: CourseWithCounts[] = courses.map((course) => {
             return {
                 ...course,
-                modulescount: course.modules.length,
-                assessmentscount: course.assessments.length,
+                modulescount: course._count.modules,
+                assessmentscount: course._count.assessments,
             };
         });
 

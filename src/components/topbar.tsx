@@ -9,13 +9,7 @@ interface UserSessionProps {
 const Topbar = ({ name, email, image }: UserSessionProps) => {
 
     return (
-        <header className="sticky top-0 w-full flex items-center h-20 px-6 sm:px-10 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm z-30">
-            <button className="block sm:hidden relative flex-shrink-0 p-2 mr-2  rounded-full">
-                <span className="sr-only">Menu</span>
-                <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-                </svg>
-            </button>
+        <header className="sticky top-0 w-full flex items-center h-20 px-4 sm:px-10 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm z-30">
             <div className="flex flex-shrink-0 items-center ml-auto">
                 <button className="inline-flex items-center p-2  rounded-lg">
                     <span className="sr-only">User Menu</span>

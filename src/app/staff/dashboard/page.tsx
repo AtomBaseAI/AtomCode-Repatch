@@ -36,10 +36,9 @@ const Dashboard = async () => {
   }
   return (
     <>
-      <div className="w-full flex flex-row gap-2 justify-start items-start px-3">
-        {courses.map((course, index) => (
-          <>
-            <div key={index} className='w-[18rem] h-[14rem] flex flex-col justify-center items-center shadow-md rounded-md border hover:border-purple-600'>
+      <div className="w-full flex flex-row flex-wrap gap-2 justify-start items-start px-3">
+        {courses.map((course) => (
+          <div key={course.id} className='w-[18rem] h-[14rem] flex flex-col justify-center items-center shadow-md rounded-md border hover:border-purple-600'>
               <div className=' w-full flex flex-col justify-center items-center'>
                 <div className='w-[90%] h-[20%] flex justify-start items-center flex-row mb-2'>
                   <div className='h-full flex justify-center items-center'>
@@ -116,7 +115,6 @@ const Dashboard = async () => {
                 </div>
               </div>
             </div>
-          </>
         ))
         }
       </div>

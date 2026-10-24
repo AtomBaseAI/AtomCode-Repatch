@@ -122,7 +122,7 @@ export const columns: ColumnDef<CourseTableType>[] = [
       }
 
       return (
-        <div className="flex items-center w-[120px]">
+        <div className="flex items-center w-fit">
           <span className="flex gap-2">
             <CModules cid={cid} />
             <CAssessments cid={cid}/>

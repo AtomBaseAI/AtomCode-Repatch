@@ -4,12 +4,27 @@ export const getAllModulesByCourseId = async (id: string) => {
     try {
         const modulesdata = await db.module.findMany({
             where: { courseId: id },
-            include: { questions: true, mcqQuestions: true }
+            select: {
+                id: true,
+                title: true,
+                moduledate: true,
+                modulestatus: true,
+                language: true,
+                maxscore: true,
+                concepturl: true,
+                courseId: true,
+                _count: {
+                    select: {
+                        questions: true,
+                        mcqQuestions: true,
+                    },
+                },
+            },
         })
         const modules = modulesdata.map(module => ({
             ...module,
-            questionscount: module.questions.length,
-            mcqcount: module.mcqQuestions.length
+            questionscount: module._count.questions,
+            mcqcount: module._count.mcqQuestions
         }));
 
         return modules

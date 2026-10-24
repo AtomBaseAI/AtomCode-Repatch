@@ -17,8 +17,8 @@ const CourseLeaderboard = async ({ params }: { params: Promise<{ cid }> }) => {
     }
     return (
         <>
-            <div className="hidden h-full flex-1 flex-col space-y-2 p-8 md:flex w-full justify-center items-center">
-                <div className="flex items-center justify-between space-y-2 w-full">
+            <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full justify-center items-center">
+                <div className="flex flex-wrap items-center justify-between gap-2 space-y-2 w-full">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight">
                             Course Leaderboard

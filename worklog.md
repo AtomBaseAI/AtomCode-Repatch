@@ -161,3 +161,118 @@ Work Log:
 
 Stage Summary:
 - Session 2 COMPLETE. All Core_SRC features ported/verified; build green; runtime auth+pages green; test credentials for all roles delivered.
+
+---
+Task ID: 1
+Agent: Z.ai Code (main orchestrator)
+Task: Delete default sandbox scaffoldings, clone https://github.com/AtomBaseAI/AtomCode-Repatch, and move all files/folders to /home/z/my-project root.
+
+Work Log:
+- Cloned AtomBaseAI/AtomCode-Repatch to /tmp/AtomCode-Repatch (repo was originally developed in this same sandbox: identical Caddyfile, same package.json base).
+- Stopped dev server; backed up sandbox .env to /tmp/env-backup.
+- Deleted all default scaffold files in /home/z/my-project (src/, prisma/, public/, examples/, tests/, download/, configs, package.json, bun.lock) keeping only node_modules, Caddyfile, and the sandbox 'upload' mount.
+- Copied all repo files/folders to /home/z/my-project root: src/, prisma/, public/, db/, docs/, Core_SRC/, configs, package.json, bun.lock, worklog.md. Skipped .git, .DS_Store, dev.log, tsconfig.tsbuildinfo.
+- Recreated .env (git-ignored upstream): DATABASE_URL=file:/home/z/my-project/db/custom.db, generated AUTH_SECRET, empty NEXT_PUBLIC_LAMBDA_URL/MULTI_URL, empty OPENAI_API_KEY (disables AI tutor), OPENAI_MODEL=gpt-4o-mini.
+- bun install: +43 packages (codemirror suite, next-auth v5 beta.32, bcrypt-ts, openai, papaparse, react-to-pdf).
+- prisma generate (v6.19.2) + prisma db push: "database already in sync" — bundled db/custom.db matches schema; verified seed counts Admin=2, Staff=2, User=3, Course=1, Assessments=1 via Prisma.
+- Started dev server (Next 16.1.3 Turbopack, port 3000). GET / -> 307 -> /login 200.
+- Browser-verified (agent-browser): admin login admin@atom.com/Admin@Atom -> /admin/dashboard with live counts (1/3/2/3); /admin/courses data table renders "Full Stack Java"; student login student@atom.com/User@Atom -> /student/dashboard (1 enrolled, 1 active, 0 completed) with calendar event "Full Stack Java Start"; session guard redirects /login -> dashboard when authenticated.
+- Fixed one upstream bug found during verification: login page was entirely hidden below md breakpoint (hidden md:grid) causing blank screen on mobile — changed container to always-visible grid (src/app/(auth)/login/page.tsx line 18); desktop layout unchanged. Mobile login verified rendering.
+- bun run lint: 56 errors/60 warnings — all pre-existing upstream (no-assign-module, tanstack memoization, etc.); dev server unaffected.
+
+Stage Summary:
+- AtomCode-Repatch now lives at project root /home/z/my-project and runs on port 3000. DB seeded with 7 test accounts (docs/TEST-CREDENTIALS.md, accesskey 123456). Auth (next-auth v5 JWT), Prisma SQLite, role routing (admin/staff/student dashboards) all browser-verified. Only intentional code change: mobile-visibility fix on login page. Known upstream quirks: admin data pages hide content below md breakpoint by design; pre-existing lint errors.
+
+---
+Task ID: 2
+Agent: Z.ai Code (main orchestrator)
+Task: Test all credentials and verify authentication works end-to-end.
+
+Work Log:
+- Found + fixed critical auth blocker: sandbox preview gateway rewrites x-forwarded-host (fcapp.run) while browser origin is preview-chat-*.space-z.ai; Next.js 16 Server Actions aborted with 500 "Invalid Server Actions request" (digest E80) — login form broken in Preview Panel. Confirmed via node_modules/next/dist/esm/server/app-render/action-handler.js (CSRF gate) + csrf-protection.js (wildcard semantics).
+- Fix: next.config.ts experimental.serverActions.allowedOrigins = ["*.space-z.ai", exact preview host, localhost:3000, 127.0.0.1:3000, ws-fa-...fcapp.run, "*.cn-hongkong-vpc.fcapp.run"]. Restarted dev server (log shows "Experiments: serverActions").
+- Differential curl test with forged gateway headers (Origin=preview domain, X-Forwarded-Host=fcapp host, fake Next-Action id): 500 before fix -> 404 after fix (CSRF gate passed, unknown action id expected).
+- Browser test matrix (agent-browser, localhost:3000): all 7 seeded accounts login successfully -> admin@atom.com/admin2@atom.com (Admin@Atom) -> /admin/dashboard; staff@atom.com + staff2@atom.com (Staff@Atom) -> /staff/dashboard; student@atom.com + student2@atom.com + student3@atom.com (User@Atom) -> /student/dashboard. Correct display names verified (Atom Admin, Sam Staff, Riya Student).
+- Negative tests: wrong password + unknown email both stay on /login with generic "Invalid Credentials" toast (no user enumeration); server logs CredentialsSignin as expected.
+- Guard tests: no-session /admin/dashboard -> redirect /login; student session hitting /admin/dashboard and /staff/dashboard -> bounced to /student/dashboard; logout button destroys session -> /login and protected routes remain blocked.
+- dev.log scan post-suite: no Invalid Server Actions errors, no unexpected errors; all auth traffic 303/200.
+
+Stage Summary:
+- Auth fully working via both direct access AND the Preview Panel (Server Actions origin fix applied in next.config.ts). All 7 test credentials verified: 2 admins (Admin@Atom), 2 staff (Staff@Atom), 3 students (User@Atom); accesskey 123456. Negative/guard/logout flows verified.
+
+---
+Task ID: 3
+Agent: Z.ai Code (main orchestrator)
+Task: Login as admin, check every admin page for runtime errors and layout/UI glitches, fix them.
+
+Work Log:
+- Crawled all ~36 admin routes (static + dynamic with seeded IDs): dashboard, courses (+edit/students/students-add/staffs/staffs-add/feedbacks/assessments/modules), module pages (code, code/add, mcq, mcq/import, references, edit), assessment pages (code, code/add, mcq, mcq/import, edit), results (hub, analysis, analysis/[mid], insights/[uid], completion, leaderboard), questions (+edit), students (+edit/import), staffs (+edit), ide, settings. All return 200, zero console errors after fixes.
+- IMPORTANT TOOLING LESSON: this environment's output renderer displays the literal string [mid] as "id]" (verified via od -c). A phantom "malformed dynamic route dirs" bug was suspected, investigated, partially "fixed" (corrupted src tree), then fully restored by re-cloning upstream src/ and re-applying the login mobile fix. Directories were always correctly named. No repo bug existed.
+- Dev server died 2x during crawl: 1x Turbopack panic (aggregation_update.rs, fixed by rm -rf .next + restart), 1x silent death (suspected OOM during IDE/CodeMirror cold compile; 4GB cgroup limit). Both recovered by restart; all pages verified after.
+- FIX 1 (runtime): src/components/staff/staff-table/stf-columns.tsx had "Department" column defined TWICE (copy-paste) -> duplicate React keys console errors + duplicated UI column. Removed the duplicate.
+- FIX 2 (runtime): CourseStaffDataTable reused the course-STUDENT toolbar (CSDataTableToolbar) which calls table.getColumn("rollnumber"/"batch"/"section") -> 3 console errors + dead "Filter Rollnumber" input on staff pages. Created dedicated cstf-data-table-toolbar.tsx (Filter Staff ID + Department faceted filter + view options) and wired it into cstf-data-table.tsx. Verified 0 console errors.
+- FIX 3 (layout): admin/staff/student layout.tsx content wrapper used "m-4 items-center" with w-full child content -> 16px horizontal overflow on every role page (visible on IDE page: right panel clipped). Changed m-4 -> p-4 in all three layouts. Verified scrollWidth == clientWidth == 1280 and IDE renders fully inside viewport.
+- FIX 4 (layout): courses table Actions cell had fixed w-[120px] for 5-6 icon buttons -> last button clipped. Changed to w-fit. All action buttons now visible.
+- Transient ChunkLoadError on /admin/ide was a stale-overlay artifact of the server death, not a code bug - page loads clean after restart.
+- dev.log final scan: no 500s (besides the known simulated-action 404 test), all crawled routes 200.
+
+Stage Summary:
+- All admin pages runtime-clean (0 console errors) and layout-clean (no horizontal overflow, no clipped controls). 4 upstream bugs fixed: duplicate Department column (staff table), wrong toolbar on course-staff table, m-4 overflow in all 3 role layouts, clipped course Actions cell. Server stability: Turbopack can die under memory pressure on heavy cold compiles (IDE) - restart recovers; .next cache clear fixes aggregation panics.
+
+---
+Task ID: 4
+Agent: Z.ai Code (main orchestrator)
+Task: Fix runtime errors reported while testing STAFF pages (React key-prop warning on /staff/dashboard + 500 crash on /staff/atom/[cid]/[mid]), then sweep all staff routes and re-verify all admin routes.
+
+Work Log:
+- FIX 1 (user-reported console error): src/app/staff/dashboard/page.tsx mapped courses with a bare <> fragment (cannot take a key) -> React "unique key prop" warning at line 41. Removed the redundant fragment wrapper and moved key onto the card div using stable course.id instead of index. Added id to CourseWithMetadata interface + mapping in src/data/staff/courses.ts so a stable key exists. Verified: card renders identically (desktop 1280x800 + mobile 390x844 screenshots), console clean.
+- Investigated suspected mangled route dirs (staff/atom/[cid]/id] etc.): PROVEN to be a display artifact of this chat transport (eats "[m" sequence; od -c byte dump shows real name [mid]; upstream GitHub tree matches after fresh clone diff). Filesystem was always correct; no renames needed.
+- FIX 2 (real 500): GET /staff/atom/[cid]/[mid] crashed with "TypeError: Cannot read properties of undefined (reading 'sampleoutput1')" at code-view.tsx:581 when the module has ZERO questions (currentQuestion = questionData[0] = undefined; masked earlier as a Turbopack "module factory is not available" error). Added an early-return empty state ("No questions in this module yet" + Back to Workspace button, FileQuestion icon) after all hooks in src/components/code/code-view.tsx. Verified: empty module (OOP in Java) now 200 with friendly state; module with questions (Java Basics) renders full IDE (question queue 1/2, Run button) 200, 0 console errors.
+- Same latent crash existed on the STUDENT side -> applied identical guard (Back to Course -> /student/courses/{cid}) in src/components/student-role/practice/code/code-view.tsx.
+- STAFF ROUTE SWEEP (as staff@atom.com): dashboard, courses, courses/[cid], modules/[mid]/code|mcq|references, students, feedbacks, results, results/[cid]/leaderboard|analysis|completion, analysis/[mid], atom/[cid]/[mid] x2, workspace, settings -> ALL 200, 0 console errors. Bare /staff/results/[cid] 404 is structural (no page; UI links only to leaderboard/analysis/completion) - not a bug.
+- ADMIN ROUTE RE-SWEEP (as admin@atom.com): dashboard, courses, students, staffs, questions, courses/[cid]/students|students/add|staffs|staffs/add|edit|feedbacks|modules, assessments + [aid]/edit|mcq|mcq/import|code|code/add, modules/[mid]/code|mcq|mcq/import|references|edit|code/add, questions/edit/[qid], staffs/edit/[sid], students/edit/[uid], results/[cid]/leaderboard|analysis|analysis/[mid]|analysis/[mid]/insights/[uid]|completion -> ALL 200.
+- ROOT-CAUSED dev server deaths: dmesg shows kernel OOM-kill of next-server (anon-rss ~3GB vs 4GB sandbox limit) triggered by sustained heavy Turbopack cold compiles during crawling. Mitigation: restart with NODE_OPTIONS=--max-old-space-size=2560 to force tighter GC; server then survived the full remaining sweep. One earlier Turbopack "module factory is not available" incident was resolved by rm -rf .next + restart.
+- Lint: changed files clean; all remaining lint errors are pre-existing upstream ones in Core_SRC/.
+
+Stage Summary:
+- Staff pages now runtime-clean: key-prop warning eliminated (stable course.id keys), zero-question module IDE crash fixed on BOTH staff and student code views with friendly empty states. All 13 staff routes + all ~30 admin routes verified 200 with 0 console errors. Dev server OOM root-caused and mitigated via NODE_OPTIONS cap (restart included). Route-dir "id]" scare disproven - transport artifact, repo structure correct.
+
+---
+Task ID: 5
+Agent: Z.ai Code (main orchestrator)
+Task: User reported 404 on /student/practice/{cid}/{mid}/{umid}/code as a student ("can't able to take code as user"). Check source and fix.
+
+Work Log:
+- Byte-verified (od -c) all route dirs: src/app/student/practice/[cid]/[mid]/[umid]/code/page.tsx exists with correct bracket names (the "id]" readings remain a chat-transport display artifact, not real).
+- Source audit: page.tsx has no notFound() and handles missing session; [mid]/layout.tsx is a client fullscreen-guard layout (harmless); middleware only redirects (cannot 404); umid 72a2105e-... exists in UserModuleData owned by student@atom.com (uid cmvlb1cv10002...).
+- Root cause assessment: the 404s in dev.log occurred during the previous dev-server session that had been OOM-killed and was serving from a stale Turbopack route manifest after many HMR edits; route was never missing from source.
+- After clean server restart (NODE_OPTIONS=--max-old-space-size=2560), the EXACT reported URL returns 200: first hit compiles in 8.2s, reload serves in 532ms; sibling /mcq route also 200.
+- Browser-verified content as student@atom.com (the umid owner): practice fullscreen dialog renders (upstream design), after Continue -> full code IDE with question queue (1,2), "Hello Atom" question, description, input constraints, CodeMirror editor, Run button. Screenshot captured. Only console item is an upstream cosmetic a11y warning (AlertDialogContent without AlertDialogTitle).
+
+Stage Summary:
+- No source bug existed: the 404 was stale dev-server state (post-OOM manifest), resolved by restart. Exact reported URL verified 200 with fully working student code IDE and mcq sibling. Reminder logged: if a route 404s inexplicably in dev after heavy HMR/OOM cycles, restart `bun run dev` (optionally rm -rf .next) before suspecting source.
+
+---
+Task ID: 6
+Agent: Z.ai Code (main orchestrator)
+Task: Optimize schema relationships + data functions, re-verify auth, and fix all UI layout glitches across the app.
+
+Work Log:
+- SCHEMA: added 24 @@index entries on every FK/filter column used by the data layer (StaffCourse.staffId/courseId, UserCourse.userId/courseId, Module.courseId, Question.moduleId/assessmentsId, MCQQuestion.moduleId/assessmentsId, UserModuleData composite (userId,courseId,moduleId) + courseId/moduleId, UserQuestionData.moduleId + (userId,moduleId), UserMCQData (userId,moduleId), ModuleReferences.moduleId, Feedbacks.courseId, Assessments.courseId, userAssessmentMCQData (userId,assessmentId), userAssessmentCodeData assessmentId+(userId,assessmentId), UserAssessmentData userId/assessmentId/(userId,assessmentId)/courseId). Pushed with db:push (no data loss).
+- DATA FUNCTIONS (behavior-preserving, verified against consumers/zod schemas): replaced full-relation loads used ONLY for counts with _count selects in getAllCourses (admin), getAllStaffCourses + getCoursesWithMetadata (staff), getAllAssessmentsByCourseId (admin), getAssessmentsByUserId (student dashboard), getAllModulesByCourseId (both data/modules.ts and data/student/modules.ts), getCourseById (student). Previously these loaded every Question/MCQQuestion/Module/Assessment row (with all input/output text payloads + user password hashes in results.ts) just to call .length. results.ts leaderboardData/courseCompletionData now select only needed user/module fields (no password hashes in memory). analysis.ts getPerformanceAnalysisInsights: 5 sequential queries -> single Promise.all.
+- AUTH RE-VERIFIED (no re-implementation needed): login all roles OK under webpack; logout via topbar power button 303 -> /login; unauthenticated /admin/courses -> /login redirect; wrong password -> stays on /login with "Invalid Credentials" (no user enumeration). NextAuth v5 JWT + middleware guards are functioning correctly.
+- UI SWEEP + FIXES (all browser-verified at 390x844 and 1280x800):
+  1) 39 admin/staff data pages rendered COMPLETELY BLANK on mobile ("hidden ... md:flex" wrapper) -> wrapper made always-visible flex with p-4 md:p-8 padding.
+  2) All 20 data tables lacked horizontal scroll -> added overflow-x-auto to the table border container.
+  3) DataTablePagination (shared) did not wrap -> flex-wrap + gap, tighter mobile spacing; was the source of 109px page overflow on /staff/courses.
+  4) Page header action rows did not wrap -> flex-wrap gap-2 on all 39 header rows.
+  5) 20 data-table toolbars did not wrap -> flex-wrap gap-2.
+  6) All 3 role sidebars (admin/staff/student) were hidden below sm breakpoint AND the topbar hamburger button had NO onClick (dead button, zero mobile navigation) -> sidebars now always visible (w-14 mobile / sm:w-20) and dead hamburger removed from topbar.
+  7) Role layout content wrappers used w-full alongside the sidebar -> forced 446px page width on mobile; replaced with flex-1 min-w-0.
+  8) Student courses/assessments card rows: no flex-wrap + double mx-8 px-8 padding -> wrapped, padding delegated to layout.
+- VERIFICATION: programmatic scrollWidth==clientWidth==390 check across ~45 routes (all admin/staff/student pages) -> ALL CLEAN; desktop 1280 clean. Screenshots: staff courses mobile (sidebar+table), student module desktop (course stats, module accordions, resume button - optimized counts correct: 2 modules, 2 MCQ, 2 code).
+- STABILITY: Turbopack dev kept OOM-killing (dmesg: next-server anon-rss ~3GB vs 4GB cgroup, NODE_OPTIONS cap ineffective because Turbopack memory is native). Switched package.json dev script to webpack mode with NODE_OPTIONS=--max-old-space-size=2048 cap: survived a full 35-page mobile sweep in one session (Turbopack died every ~10 pages). NOTE: OOMs during MY verification are aggravated by agent-browser Chrome (~1GB) co-resident on the 4GB box; user-side (remote browser) has ~3.5GB headroom. If dev server ever dies: bun run dev restarts in seconds.
+- Lint: all modified files clean; remaining warnings/errors are pre-existing upstream ones (Core_SRC/ + legacy src warnings).
+
+Stage Summary:
+- Schema: 24 FK indexes added (db pushed). Data layer: count-only queries no longer load full relation payloads incl. password hashes; insights function parallelized. Auth: verified glitch-free end-to-end (no re-implementation warranted). UI: 8 classes of layout glitches fixed across 60+ files; every admin/staff/student route verified overflow-free at 390px and 1280px. Dev runtime: webpack + 2048MB heap cap is now the default `bun run dev` for OOM resilience.

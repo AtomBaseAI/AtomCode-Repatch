@@ -72,7 +72,7 @@ export function AQuestionAddDataTable<TData, TValue>({
   return (
     <div className="space-y-4">
       <AQADataTableToolbar table={table} aid={aid}/>
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

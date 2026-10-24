@@ -1,6 +1,6 @@
 "use client"
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, ArrowLeft, Loader, Minimize, Maximize, LogOut } from 'lucide-react';
+import { Sun, Moon, ArrowLeft, Loader, Minimize, Maximize, LogOut, FileQuestion } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import {
     ResizableHandle,
@@ -440,6 +440,21 @@ const CodeView = ({ questions, mid, cid, }: { questions: Question[], mid: string
     const handleRoute = () => {
         setRouteBtnLoading(true)
         router.push('/staff/workspace')
+    }
+    if (!currentQuestion) {
+        return (
+            <main className="flex min-h-screen w-full flex-col items-center justify-center gap-4 px-4">
+                <FileQuestion className="h-14 w-14 text-muted-foreground" />
+                <h1 className="text-lg font-semibold text-center">No questions in this module yet</h1>
+                <p className="text-sm text-muted-foreground text-center max-w-sm">
+                    Questions have not been added to this module, so there is nothing to work on here.
+                </p>
+                <Button onClick={handleRoute} disabled={routeBtnLoading} className="gap-2">
+                    {routeBtnLoading && <Loader className="animate-spin p-1" />}
+                    Back to Workspace
+                </Button>
+            </main>
+        )
     }
     return (
         <main className="flex min-h-screen min-w-screen flex-row">

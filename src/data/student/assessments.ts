@@ -48,13 +48,27 @@ function isTimeInRange(current: string, start: string, end: string): boolean {
 export async function getAssessmentsByUserId(userId: string) {
     const userCourses = await db.userCourse.findMany({
         where: { userId, active: true },
-        include: {
+        select: {
             course: {
-                include: {
+                select: {
+                    id: true,
+                    title: true,
                     assessments: {
-                        include: {
-                            mcqQuestions: true,
-                            questions: true,
+                        select: {
+                            id: true,
+                            title: true,
+                            date: true,
+                            courseId: true,
+                            maxtime: true,
+                            active: true,
+                            maxscore: true,
+                            tabswitches: true,
+                            _count: {
+                                select: {
+                                    mcqQuestions: true,
+                                    questions: true,
+                                },
+                            },
                             UserAssessmentData: {
                                 where: { userId },
                                 select: { status: true }
@@ -113,8 +127,8 @@ export async function getAssessmentsByUserId(userId: string) {
                 starttime: startTime,
                 maxtime: assessment.maxtime,
                 active: assessment.active,
-                mcqcount: assessment.mcqQuestions.length,
-                codecount: assessment.questions.length,
+                mcqcount: assessment._count.mcqQuestions,
+                codecount: assessment._count.questions,
                 tabswitches: assessment.tabswitches,
                 status: dynamicStatus,
             };

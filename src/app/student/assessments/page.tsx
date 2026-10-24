@@ -34,7 +34,7 @@ const Assesments = async () => {
   }
   const assessmentData = await fetchAssessments(uid)
   return (
-    <div className='w-full flex flex-col gap-2 mx-8 px-8'>
+    <div className='w-full flex flex-col gap-2'>
       {assessmentData.length === 0 ? (
         <div className="w-full h-[75vh] flex flex-col gap-2 justify-center items-center">
           <div className=" shadow-lg rounded-md overflow-hidden w-[20rem] order-first lg:order-none border hover:border-primary" >
@@ -45,7 +45,7 @@ const Assesments = async () => {
           </div>
         </div>
       ) : (
-        <div className="h-full w-full mx-auto  justify-start justify-items-start flex gap-x-6 gap-y-6">
+        <div className="h-full w-full mx-auto justify-start justify-items-start flex flex-wrap gap-x-6 gap-y-6">
           {assessmentData.map((assessment, index) => (
             <AssessmentCard key={index} data={assessment} />
           ))

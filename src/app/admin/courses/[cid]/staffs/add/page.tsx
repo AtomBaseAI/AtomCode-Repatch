@@ -31,8 +31,8 @@ const CourseStaffsAdd = async ({ params }: { params: Promise<{ cid: string}> }) 
     const filterStaffs = allstaffs.filter(staff => !coursestaffs?.includes(staff.id));
     return (
         <>
-            <div className="hidden h-full flex-1 flex-col space-y-2 p-8 md:flex w-full">
-                <div className="flex items-center justify-between space-y-2">
+            <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
+                <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight">
                             {course?.title}

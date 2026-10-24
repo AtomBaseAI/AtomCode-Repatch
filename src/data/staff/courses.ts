@@ -6,6 +6,7 @@ interface CourseWithCounts {
 }
 
 interface CourseWithMetadata {
+    id: string;
     coursetitle: string;
     startdate: Date;
     enddate: Date;
@@ -24,17 +25,26 @@ export const getAllStaffCourses = async (sid: string): Promise<CourseWithCounts[
                     },
                 },
             },
-            include: {
-                modules: true,
-                assessments: true,
+            select: {
+                id: true,
+                title: true,
+                startdate: true,
+                enddate: true,
+                language: true,
+                _count: {
+                    select: {
+                        modules: true,
+                        assessments: true,
+                    },
+                },
             },
         });
 
         const coursesWithCounts: CourseWithCounts[] = courses.map((course) => {
             return {
                 ...course,
-                modulescount: course.modules.length,
-                assessmentscount: course.assessments.length,
+                modulescount: course._count.modules,
+                assessmentscount: course._count.assessments,
             };
         });
 
@@ -77,27 +87,40 @@ export const getCoursesWithMetadata = async (staffId: string): Promise<CourseWit
                     },
                 },
             },
-            include: {
-                userCourses: true, // To count students
-                modules: {
-                    include: {
-                        reference: true, // To count references
+            select: {
+                id: true,
+                title: true,
+                startdate: true,
+                enddate: true,
+                _count: {
+                    select: {
+                        userCourses: true,
+                        feedbacks: true,
                     },
                 },
-                feedbacks: true, // To count feedbacks
+                modules: {
+                    select: {
+                        _count: {
+                            select: {
+                                reference: true,
+                            },
+                        },
+                    },
+                },
             },
         });
 
         const coursesWithMetadata: CourseWithMetadata[] = courses.map((course) => {
-            const studentscount = course.userCourses.length;
+            const studentscount = course._count.userCourses;
             const modulescount = course.modules.length;
             const referencescount = course.modules.reduce(
-                (total, module) => total + module.reference.length,
+                (total, module) => total + module._count.reference,
                 0
             );
-            const feedbackscount = course.feedbacks.length;
+            const feedbackscount = course._count.feedbacks;
 
             return {
+                id: course.id,
                 coursetitle: course.title,
                 startdate: course.startdate,
                 enddate: course.enddate,

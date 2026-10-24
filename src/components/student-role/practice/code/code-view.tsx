@@ -1,6 +1,6 @@
 "use client"
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, ArrowLeft, Loader } from 'lucide-react';
+import { Sun, Moon, ArrowLeft, Loader, FileQuestion } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import {
     ResizableHandle,
@@ -566,6 +566,21 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: Question[], m
     }, [toast]);
 
 
+    if (!currentQuestion) {
+        return (
+            <main className="flex min-h-screen w-full flex-col items-center justify-center gap-4 px-4">
+                <FileQuestion className="h-14 w-14 text-muted-foreground" />
+                <h1 className="text-lg font-semibold text-center">No questions in this module yet</h1>
+                <p className="text-sm text-muted-foreground text-center max-w-sm">
+                    Questions have not been added to this module, so there is nothing to practice here.
+                </p>
+                <Button onClick={() => router.push(`/student/courses/${cid}`)} className="gap-2">
+                    <ArrowLeft className="h-4 w-4" />
+                    Back to Course
+                </Button>
+            </main>
+        )
+    }
     return (
         <main className="flex min-h-screen min-w-screen flex-row">
             <aside className="sticky top-0 left-0 z-50 hidden sm:flex sm:flex-col w-20 h-screen border-r border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg">

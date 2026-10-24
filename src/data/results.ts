@@ -66,8 +66,20 @@ export const leaderboardData = async (courseId: string) => {
     // Fetch all UserModuleData entries for the given courseId
     const userModuleData = await db.userModuleData.findMany({
       where: { courseId },
-      include: {
-        user: true,
+      select: {
+        userId: true,
+        usermcqscore: true,
+        userquestionscore: true,
+        mcqtime: true,
+        questiontime: true,
+        errors: true,
+        compiles: true,
+        user: {
+          select: {
+            rollnumber: true,
+            name: true,
+          },
+        },
       },
     });
 
@@ -142,8 +154,15 @@ export const courseCompletionData = async (courseId: string): Promise<CourseComp
   try {
     const course = await db.course.findUnique({
       where: { id: courseId },
-      include: {
-        modules: true,
+      select: {
+        title: true,
+        modules: {
+          select: {
+            id: true,
+            title: true,
+            maxscore: true,
+          },
+        },
       },
     });
 
@@ -153,9 +172,31 @@ export const courseCompletionData = async (courseId: string): Promise<CourseComp
 
     const userModuleData = await db.userModuleData.findMany({
       where: { courseId },
-      include: {
-        user: true,
-        module: true,
+      select: {
+        userId: true,
+        moduleId: true,
+        usermcqscore: true,
+        userquestionscore: true,
+        mcqtime: true,
+        questiontime: true,
+        errors: true,
+        compiles: true,
+        user: {
+          select: {
+            name: true,
+            rollnumber: true,
+            batch: true,
+            department: true,
+            section: true,
+            email: true,
+          },
+        },
+        module: {
+          select: {
+            title: true,
+            maxscore: true,
+          },
+        },
       },
     });
 

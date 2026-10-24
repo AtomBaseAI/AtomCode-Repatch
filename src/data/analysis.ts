@@ -114,58 +114,57 @@ export const getStudentsDataByCourseIdByModule = async (courseId: string, module
 
 export const getPerformanceAnalysisInsights = async (courseId: string, moduleId: string, userId: string) => {
     try {
-        const codeQuestionsData = await db.userQuestionData.findMany({
-            where: {
-                userId,
-                moduleId
-            },
-            include: {
-                question: {
-                    select: {
-                        id: true,
-                        title: true,
-                        description: true
+        // All five lookups are independent — run them in parallel
+        const [codeQuestionsData, courseModuleData, course, module, student] = await Promise.all([
+            db.userQuestionData.findMany({
+                where: {
+                    userId,
+                    moduleId
+                },
+                include: {
+                    question: {
+                        select: {
+                            id: true,
+                            title: true,
+                            description: true
+                        }
                     }
                 }
-            }
-        });
-
-        const courseModuleData = await db.userModuleData.findFirst({
-            where: {
-                userId,
-                moduleId,
-                courseId
-            },
-            select: {
-                mcqtime: true,
-                mcqstatus: true,
-                usermcqscore: true,
-                totalmcqscore: true,
-                questiontime: true,
-                questionstatus: true,
-                userquestionscore: true,
-                totalquestionscore: true,
-                errors: true,
-                compiles: true,
-                modulemaxscore: true,
-                modulestatus: true
-            }
-        });
-
-        const course = await db.course.findUnique({
-            where: { id: courseId },
-            select: { title: true }
-        });
-
-        const module = await db.module.findUnique({
-            where: { id: moduleId },
-            select: { title: true, language: true }
-        });
-
-        const student = await db.user.findUnique({
-            where: { id: userId },
-            select: { name: true, rollnumber: true }
-        });
+            }),
+            db.userModuleData.findFirst({
+                where: {
+                    userId,
+                    moduleId,
+                    courseId
+                },
+                select: {
+                    mcqtime: true,
+                    mcqstatus: true,
+                    usermcqscore: true,
+                    totalmcqscore: true,
+                    questiontime: true,
+                    questionstatus: true,
+                    userquestionscore: true,
+                    totalquestionscore: true,
+                    errors: true,
+                    compiles: true,
+                    modulemaxscore: true,
+                    modulestatus: true
+                }
+            }),
+            db.course.findUnique({
+                where: { id: courseId },
+                select: { title: true }
+            }),
+            db.module.findUnique({
+                where: { id: moduleId },
+                select: { title: true, language: true }
+            }),
+            db.user.findUnique({
+                where: { id: userId },
+                select: { name: true, rollnumber: true }
+            }),
+        ]);
 
         const codeData = codeQuestionsData.map((data) => ({
             questionid: data.question.id,
