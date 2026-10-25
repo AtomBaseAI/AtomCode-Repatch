@@ -1,12 +1,5 @@
 import { db } from "@/lib/db";
-
-const formatDate = (isoDate: string): string => {
-    const date = new Date(isoDate);
-    const day = String(date.getUTCDate()).padStart(2, '0');
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-    const year = date.getUTCFullYear();
-    return `${day}/${month}/${year}`;
-};
+import { formatDate, getISTParts } from '@/lib/utils';
 
 function addMinutesToTime(time: string, minutesToAdd: number): string {
     const [hours, minutes] = time.split(":").map(Number);
@@ -66,7 +59,7 @@ export async function getAssessmentsByUserId(userId: string) {
                             _count: {
                                 select: {
                                     mcqQuestions: true,
-                                    questions: true,
+                                    codeQuestions: true,
                                 },
                             },
                             UserAssessmentData: {
@@ -86,7 +79,7 @@ export async function getAssessmentsByUserId(userId: string) {
         uc.course.assessments.map((assessment) => {
             const userAssessment = assessment.UserAssessmentData[0];
             const userStatus = userAssessment?.status || "not started";
-            const assessmentDate = assessment.date.toISOString().split("T")[0];
+            const assessmentDate = getISTParts(assessment.date)!.dayKey;
             const startTime = new Date(assessment.date).toLocaleTimeString('en-GB', {
                 timeZone: 'Asia/Kolkata',
                 hour12: false,
@@ -119,7 +112,7 @@ export async function getAssessmentsByUserId(userId: string) {
 
             return {
                 title: assessment.title,
-                assessmentdate: formatDate(`${assessment.date}`),
+                assessmentdate: formatDate(assessment.date), // IST calendar date
                 courseid: assessment.courseId,
                 assessmentid: assessment.id,
                 coursetitle: uc.course.title,
@@ -128,7 +121,7 @@ export async function getAssessmentsByUserId(userId: string) {
                 maxtime: assessment.maxtime,
                 active: assessment.active,
                 mcqcount: assessment._count.mcqQuestions,
-                codecount: assessment._count.questions,
+                codecount: assessment._count.codeQuestions,
                 tabswitches: assessment.tabswitches,
                 status: dynamicStatus,
             };
@@ -153,7 +146,7 @@ export async function getAssessmentDataByAssessmentIdUserId(
             _count: {
                 select: {
                     mcqQuestions: true,
-                    questions: true,
+                    codeQuestions: true,
                 },
             },
             maxscore: true,
@@ -172,7 +165,7 @@ export async function getAssessmentDataByAssessmentIdUserId(
     if (!assessment) return null;
 
     const { date: todayDate, time: currentTime } = getCurrentISTTime();
-    const assessmentDate = assessment.date.toISOString().split("T")[0];
+    const assessmentDate = getISTParts(assessment.date)!.dayKey;
     const startTime = new Date(assessment.date).toLocaleTimeString('en-GB', {
         timeZone: 'Asia/Kolkata',
         hour12: false,
@@ -215,7 +208,7 @@ export async function getAssessmentDataByAssessmentIdUserId(
         starttime: startTime,
         status: dynamicStatus,
         mcqCount: assessment._count.mcqQuestions,
-        questionCount: assessment._count.questions,
+        questionCount: assessment._count.codeQuestions,
         maxscore: assessment.maxscore,
         uaid,
         prestarttime,
@@ -236,7 +229,7 @@ export async function getAssessmentDataByUAID(
             assessments: {
                 include: {
                     mcqQuestions: true,
-                    questions: true,
+                    codeQuestions: true,
                 },
             },
         },
@@ -275,7 +268,7 @@ export async function getAssessmentDataByUAID(
         codeStatusMap.set(questionId, status);
     });
 
-    const processedCodeQuestions = userAssessment.assessments.questions.map((question: any) => {
+    const processedCodeQuestions = userAssessment.assessments.codeQuestions.map((question: any) => {
         const status = codeStatusMap.get(question.id);
         return {
             ...question,

@@ -8,7 +8,7 @@ export const resetModuleForStudent = async (
     mid: string,
     cid: string
 ) => {
-    const userQuestionData = await db.userQuestionData.findFirst({
+    const userCodeQuestionData = await db.userCodeQuestionData.findFirst({
         where: {
             userId: uid,
             questionId: qid,
@@ -24,14 +24,14 @@ export const resetModuleForStudent = async (
         },
     });
 
-    if (!userQuestionData && !userModuleData) {
+    if (!userCodeQuestionData && !userModuleData) {
         return { error: "Not yet submitted" };
     }
 
-    if (userQuestionData) {
-        await db.userQuestionData.update({
+    if (userCodeQuestionData) {
+        await db.userCodeQuestionData.update({
             where: {
-                id: userQuestionData.id,
+                id: userCodeQuestionData.id,
             },
             data: {
                 status: "retake",

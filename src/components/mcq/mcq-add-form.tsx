@@ -102,7 +102,7 @@ const AddMCQForm = ({ mid, aid, mcqtype }: { mid: string, aid: string, mcqtype: 
                         Add MCQ
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[85vw] h-[85vh]">
+                <DialogContent aria-describedby={undefined} className="sm:max-w-[85vw] max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Add MCQ</DialogTitle>
                     </DialogHeader>

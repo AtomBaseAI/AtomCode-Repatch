@@ -56,7 +56,7 @@ export const addmodulequestions = async (
             id: moduleId
         },
         data: {
-            questions: {
+            codeQuestions: {
                 connect: questionIds.map(id => ({ id }))
             }
         }
@@ -75,7 +75,7 @@ export const deletemodulequestionx = async (
             id: mid
         },
         data: {
-            questions: {
+            codeQuestions: {
                 disconnect: { id: id }
             }
         }

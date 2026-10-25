@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { formatDate, getISTParts, istTodayLocalStart, istWallClock } from "@/lib/utils"
 
 interface DateTimePickerProps {
   value?: Date
@@ -17,30 +18,31 @@ export function DateTimePicker({ value, onChange, disabled, placeholder = "Selec
   const [open, setOpen] = React.useState(false)
   const [time, setTime] = React.useState<string>("10:30:00")
 
-  // Extract time from existing date value
+  // Extract time from existing date value — read as app-timezone (IST)
+  // wall clock, NOT the browser's local system timezone.
   React.useEffect(() => {
     if (value) {
-      const hours = value.getHours().toString().padStart(2, "0")
-      const minutes = value.getMinutes().toString().padStart(2, "0")
-      const seconds = value.getSeconds().toString().padStart(2, "0")
-      setTime(`${hours}:${minutes}:${seconds}`)
+      const parts = getISTParts(value)
+      if (parts) {
+        const pad = (n: number) => n.toString().padStart(2, "0")
+        setTime(`${pad(parts.hour)}:${pad(parts.minute)}:${pad(parts.second)}`)
+      }
     }
   }, [value])
 
-  // Function to format date as dd/mm/yyyy
-  const formatDate = (date: Date) => {
-    const day = date.getDate().toString().padStart(2, "0")
-    const month = (date.getMonth() + 1).toString().padStart(2, "0")
-    const year = date.getFullYear()
-    return `${day}/${month}/${year}`
-  }
-
-  // Function to combine date and time
-  const combineDateTime = (date: Date, timeString: string) => {
+  // Combine the picked LOCAL calendar day (what the admin clicked in the
+  // calendar) with the typed time, interpreted as Asia/Kolkata wall clock —
+  // stores the exact IST instant regardless of the browser's timezone.
+  const combineDateTime = (pickedDate: Date, timeString: string) => {
     const [hours, minutes, seconds] = timeString.split(":").map(Number)
-    const combined = new Date(date)
-    combined.setHours(hours, minutes, seconds, 0)
-    return combined
+    return istWallClock(
+      pickedDate.getFullYear(),
+      pickedDate.getMonth() + 1,
+      pickedDate.getDate(),
+      hours,
+      minutes,
+      seconds,
+    )
   }
 
   // Handle date selection
@@ -61,9 +63,9 @@ export function DateTimePicker({ value, onChange, disabled, placeholder = "Selec
     }
   }
 
-  // Get today's date at midnight for comparison
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  // "Today" anchored to the app timezone (Asia/Kolkata): disable every
+  // calendar day before the current IST calendar day.
+  const today = istTodayLocalStart()
 
   return (
     <div className="flex gap-2">

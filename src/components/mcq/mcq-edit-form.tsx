@@ -88,7 +88,7 @@ const EditMCQForm = ({ mcq }: { mcq: z.infer<typeof MCQUpdateSchema> }) => {
                         <Pencil className="size-5 bg-transparent text-primary" />
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[85vw] h-[85vh]">
+                <DialogContent aria-describedby={undefined} className="sm:max-w-[85vw] max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Edit MCQ</DialogTitle>
                     </DialogHeader>

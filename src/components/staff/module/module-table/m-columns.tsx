@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DataTableColumnHeader } from "@/components/data-tables/data-table-column-header"
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 
 import { ModuleTableType } from "@/schemas/module-schema";
 import MCODEView from "@/components/staff/module/module-table/m-codeview";
@@ -58,7 +58,7 @@ export const columns: ColumnDef<ModuleTableType>[] = [
     ),
     cell: ({ row }) => {
       const moduleDate = new Date(row.getValue("moduledate"))
-      const formattedModuletDate = format(new Date(moduleDate), 'dd/MM/yyyy');
+      const formattedModuletDate = formatDate(moduleDate);
 
       return (
         <div className="flex space-x-2">

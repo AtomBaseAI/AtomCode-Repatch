@@ -41,6 +41,7 @@ import { AddCourseSchema } from "@/schemas/course-schema"
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { addcourse } from "@/actions/course"
+import { istTodayLocalStart } from '@/lib/utils'
 import { toast } from "sonner"
 const AddCourse = () => {
 
@@ -82,7 +83,7 @@ const AddCourse = () => {
                         Add Course
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent aria-describedby={undefined} className="sm:max-w-[425px] max-h-[calc(100vh-2rem)] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Add Course</DialogTitle>
                     </DialogHeader>
@@ -185,9 +186,7 @@ const AddCourse = () => {
                                                                 mode="single"
                                                                 selected={field.value}
                                                                 onSelect={field.onChange}
-                                                                disabled={(date) =>
-                                                                    date < new Date() || date.getFullYear() < new Date().getFullYear()
-                                                                }
+                                                                disabled={(date) => date < istTodayLocalStart()}
                                                                 initialFocus
                                                             />
                                                         </PopoverContent>

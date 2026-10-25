@@ -8,7 +8,7 @@ import { AddQuestionSchema, DeleteQuestionSchema, QuestionUpdateSchema } from "@
 export const addquestion = async (
     values: z.infer<typeof AddQuestionSchema>
 ) => {
-    await db.question.create({
+    await db.codeQuestion.create({
         data: {
             ...values,
         }
@@ -22,7 +22,7 @@ export const deletequestion = async (
     values: z.infer<typeof DeleteQuestionSchema>
 ) => {
     const qid = values.id;
-    await db.question.delete({
+    await db.codeQuestion.delete({
         where: {
             id: qid
         }
@@ -35,7 +35,7 @@ export const updatequestion = async (
     values: z.infer<typeof QuestionUpdateSchema>
 ) => {
     const qid = values.id;
-    await db.question.update({
+    await db.codeQuestion.update({
         where: {
             id: qid
         },

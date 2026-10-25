@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import ModuleAction from "./module-action";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import ConceptPreview from "./concept-preview";
+import { formatDate, getISTParts } from "@/lib/utils";
 
 interface ModuleResultType {
     id: string;
@@ -85,15 +86,19 @@ const mergeData = (modulesData: ModuleDataType[] | null, modulesResults: ModuleR
     });
 };
 const determineFeedbackStatus = (feedbackDate: Date): { status: string, statusClass: string, statusClassPointer: string } => {
-    const today = new Date();
+    // "Today" is the current Asia/Kolkata calendar day (app timezone), not
+    // the viewer device's local day; instant comparisons are TZ-agnostic.
+    const now = new Date();
+    const todayKey = getISTParts(now)?.dayKey;
+    const feedbackKey = getISTParts(feedbackDate)?.dayKey;
     let status = "upcoming";
     let statusClass = "bg-yellow-100 text-yellow-800 dark:bg-yello-100/10 border-yellow-300 ";
     let statusClassPointer = "cursor-not-allowed";
-    if (feedbackDate.toDateString() === today.toDateString()) {
+    if (feedbackKey && feedbackKey === todayKey) {
         status = "active";
         statusClass = "bg-green-100 text-green-800 border-green-300";
         statusClassPointer = "cursor-pointer";
-    } else if (feedbackDate < today) {
+    } else if (feedbackDate < now) {
         status = "expired";
         statusClass = "bg-red-100 text-red-800 border-red-300  cursor-not-allowed";
         statusClassPointer = "cursor-not-allowed";
@@ -145,7 +150,7 @@ const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, uid, cid 
                                                                         </AlertDialogTrigger>
                                                                         <AlertDialogContent>
                                                                             <AlertDialogHeader>
-                                                                                <AlertDialogTitle> {feedback.title} - {feedback.date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })} </AlertDialogTitle>
+                                                                                <AlertDialogTitle> {feedback.title} - {formatDate(feedback.date)} </AlertDialogTitle>
                                                                                 <AlertDialogDescription className='w-full max-w-[27rem] flex flex-wrap justify-start items-start'>
                                                                                     <span className="w-full line-clamp-3 break-words text-ellipsis">
                                                                                         {feedback.link}
@@ -153,7 +158,7 @@ const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, uid, cid 
                                                                                 </AlertDialogDescription>
                                                                             </AlertDialogHeader>
                                                                             <AlertDialogFooter>
-                                                                                <AlertDialogCancel className='bg-red-500 hover:bg-red-500/80 text-white w-full hover:text-white'>Cancel</AlertDialogCancel>
+                                                                                <AlertDialogCancel className='bg-red-500 hover:bg-red-400 text-white w-full hover:text-white'>Cancel</AlertDialogCancel>
                                                                                 <AlertDialogAction className='w-full'>
                                                                                     <a href={feedback.link} target="_blank" rel="noopener noreferrer" className="w-full h-full">
                                                                                         Open

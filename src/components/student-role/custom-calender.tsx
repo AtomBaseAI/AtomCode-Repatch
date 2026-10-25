@@ -1,6 +1,7 @@
 "use client";
 import { useState, type JSX } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { APP_TIMEZONE, getISTParts } from '@/lib/utils';
 
 interface CourseData {
   courseId: string;
@@ -12,6 +13,18 @@ interface CourseData {
   courseProgres: number;
 }
 
+const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+
+/**
+ * Dashboard month calendar. Every calendar-day computation (viewed month,
+ * grid cells, "today" highlight, event day matching) is pinned to the app
+ * timezone (Asia/Kolkata) via getISTParts dayKeys, so the calendar looks
+ * identical for every user no matter which timezone their device runs in.
+ *
+ * Layout: both the weekday header and the day cells are 7-column CSS grids
+ * with the same gap, and cells stretch to fill their track (no fixed
+ * widths), so columns always line up and never overlap at any viewport.
+ */
 const CalendarLayout = ({ Courses }: { Courses: CourseData[] }) => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -29,61 +42,84 @@ const CalendarLayout = ({ Courses }: { Courses: CourseData[] }) => {
     }
   ]);
 
-  const formatDate = (date: Date): string => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
+  /** Stable Asia/Kolkata "YYYY-MM-DD" key for any instant. */
+  const dayKeyOf = (date: Date): string | undefined =>
+    getISTParts(date)?.dayKey;
 
-  const getDaysInMonth = (year: number, month: number): number => new Date(year, month + 1, 0).getDate();
-  const getFirstDayOfMonth = (year: number, month: number): number => new Date(year, month, 1).getDay();
+  // The viewed month is the IST calendar month of the anchor instant
+  const viewParts = getISTParts(currentDate);
+  if (!viewParts) return null;
+  const viewYear = viewParts.year;
+  const viewMonth0 = viewParts.month - 1; // 0-based for Date.UTC math
+
+  // Month-grid helpers built on UTC-midnight anchors (their IST dayKey is
+  // the same calendar day, since UTC midnight is 05:30 IST).
+  const getDaysInMonth = (year: number, month0: number): number =>
+    new Date(Date.UTC(year, month0 + 1, 0)).getUTCDate();
+  const getFirstDayOfMonth = (year: number, month0: number): number =>
+    new Date(Date.UTC(year, month0, 1)).getUTCDay();
+
   const handleDateClick = (day: Date): void => {
     setSelectedDate(day);
   };
 
   const renderDays = (): JSX.Element[] => {
     const days: JSX.Element[] = [];
-    const daysInMonth = getDaysInMonth(currentDate.getFullYear(), currentDate.getMonth());
-    const firstDayOfMonth = getFirstDayOfMonth(currentDate.getFullYear(), currentDate.getMonth());
+    const daysInMonth = getDaysInMonth(viewYear, viewMonth0);
+    const firstDayOfMonth = getFirstDayOfMonth(viewYear, viewMonth0);
+    const todayKey = dayKeyOf(new Date());
 
+    // Leading blanks (days before the 1st)
     for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push(<div key={`empty-${i}`} className="empty-cell bg-violet-200 dark:bg-violet-950"></div>);
+      days.push(
+        <div
+          key={`empty-${i}`}
+          aria-hidden="true"
+          className="h-24 border bg-violet-100 dark:bg-violet-900/20"
+        />
+      );
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-      const isSelected = selectedDate && date.toDateString() === selectedDate.toDateString();
-      const isCurrentDate = date.toDateString() === new Date().toDateString();
-      const isSunday = date.getDay() === 0;
+      const date = new Date(Date.UTC(viewYear, viewMonth0, day));
+      const dayKey = dayKeyOf(date);
+      const isSelected = !!selectedDate && dayKey === dayKeyOf(selectedDate);
+      const isCurrentDate = dayKey === todayKey;
+      const isSunday = date.getUTCDay() === 0;
 
-      const dayEvents = events.filter(
-        (event) =>
-          event.date.getFullYear() === date.getFullYear() &&
-          event.date.getMonth() === date.getMonth() &&
-          event.date.getDate() === date.getDate()
-      );
+      const dayEvents = events.filter((event) => dayKeyOf(event.date) === dayKey);
+      const hasStart = dayEvents.some(event => event.type === 'start');
+      const hasEnd = dayEvents.some(event => event.type === 'end');
 
-      let bgColor = '';
-      if (dayEvents.some(event => event.type === 'start')) {
-        bgColor = 'bg-green-500 text-white  hover:bg-green-500/50';
-      } else if (dayEvents.some(event => event.type === 'end')) {
-        bgColor = 'bg-red-500 text-white hover:bg-red-500/50';
+      // Style precedence: event > today > sunday > default.
+      let cellStyle: string;
+      if (hasStart) {
+        cellStyle = 'border-green-600 bg-green-500 text-white';
+      } else if (hasEnd) {
+        cellStyle = 'border-red-600 bg-red-500 text-white';
       } else if (isCurrentDate) {
-        bgColor = 'bg-primary text-white';
+        cellStyle = 'border-primary bg-primary text-white';
+      } else if (isSunday) {
+        cellStyle = 'border-violet-200 bg-violet-100 text-violet-900 dark:border-violet-800 dark:bg-violet-900/30 dark:text-violet-200';
+      } else {
+        cellStyle = 'hover:bg-violet-50 dark:hover:bg-violet-900/20';
       }
 
       days.push(
         <div
           key={day}
-          className={`calendar-day ${isSelected ? 'selected' : ''} ${bgColor} ${isSunday ? 'bg-violet-200 dark:bg-violet-950 text-white' : ''} w-70 flex items-center justify-center flex-col h-[6rem] border-2 hover:bg-primary hover:text-white font-bold gap-2`}
+          className={`flex h-24 w-full cursor-pointer flex-col items-center justify-center gap-1 overflow-hidden border p-1 font-bold transition-colors ${cellStyle} ${isSelected && !isCurrentDate ? 'ring-2 ring-inset ring-violet-500' : ''}`}
           onClick={() => handleDateClick(date)}
         >
-          <div className={`day-number text-center font-bold`}>{day}</div>
+          <div className="day-number text-center">{day}</div>
           {dayEvents.length > 0 && (
-            <div className="events">
+            <div className="events flex w-full flex-col items-center gap-0.5">
               {dayEvents.map((event, index) => (
-                <div key={index} className="event text-center p-1 rounded-sm py-1 text-white text-sm">
+                <div
+                  key={index}
+                  title={event.title}
+                  className="event w-full truncate rounded-sm bg-white/20 px-1 py-0.5 text-center text-[11px] font-medium leading-tight"
+                >
                   {event.title}
                 </div>
               ))}
@@ -93,30 +129,47 @@ const CalendarLayout = ({ Courses }: { Courses: CourseData[] }) => {
       );
     }
 
+    // Trailing blanks so the last row is always complete
+    const totalCells = firstDayOfMonth + daysInMonth;
+    const trailing = (7 - (totalCells % 7)) % 7;
+    for (let i = 0; i < trailing; i++) {
+      days.push(
+        <div
+          key={`tail-${i}`}
+          aria-hidden="true"
+          className="h-24 border bg-violet-100 dark:bg-violet-900/20"
+        />
+      );
+    }
+
     return days;
   };
 
   return (
-    <div className="calendar-container p-4 m-4 mx-auto w-full shadow-lg">
-      <div className="header flex flex-row justify-center items-center text-primary p-4 w-full">
-        <h2 className="m-0 font-bold font-lg flex justify-start w-[96%] border p-2">{currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h2>
-        <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
-          className="text-primary px-2 border py-1 rounded cursor-pointer">
-          <ChevronLeft className='h-[2rem] w-[2rem]' />
+    <div className="calendar-container mx-auto m-4 w-full rounded-md border bg-card p-4 shadow-lg">
+      <div className="header flex flex-row items-center gap-2 text-primary p-2 pb-4 w-full">
+        <h2 className="m-0 flex-1 border p-2 text-lg font-bold">
+          {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: APP_TIMEZONE })}
+        </h2>
+        <button onClick={() => setCurrentDate(new Date(Date.UTC(viewYear, viewMonth0 - 1, 1)))}
+          aria-label="Previous month"
+          className="border px-2 py-1 text-primary rounded cursor-pointer hover:bg-violet-50 dark:hover:bg-violet-900/30">
+          <ChevronLeft className='h-6 w-6' />
         </button>
-        <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
-          className="text-primary px-2 border py-1 rounded cursor-pointer">
-          <ChevronRight className='h-[2rem] w-[2rem]' />
+        <button onClick={() => setCurrentDate(new Date(Date.UTC(viewYear, viewMonth0 + 1, 1)))}
+          aria-label="Next month"
+          className="border px-2 py-1 text-primary rounded cursor-pointer hover:bg-violet-50 dark:hover:bg-violet-900/30">
+          <ChevronRight className='h-6 w-6' />
         </button>
       </div>
-      <div className="days-of-week flex justify-between w-full">
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
-          <div key={index} className="day-of-week font-bold text-center px-4 border-2 w-full border-primary">
+      <div className="days-of-week grid grid-cols-7 gap-1 w-full">
+        {WEEK_DAYS.map((day) => (
+          <div key={day} className="day-of-week border-2 border-primary bg-primary/5 py-1 text-center font-bold text-primary">
             {day}
           </div>
         ))}
       </div>
-      <div className="calendar-days grid grid-cols-7 gap-1">
+      <div className="calendar-days mt-1 grid grid-cols-7 gap-1 w-full">
         {renderDays()}
       </div>
     </div>

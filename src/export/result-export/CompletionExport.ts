@@ -1,4 +1,5 @@
 import { ResultTableStudentType } from '@/schemas/result-matrix-schema';
+import { formatDate } from '@/lib/utils';
 import { unparse } from 'papaparse';
 
 const transformData = (data: ResultTableStudentType[]) => {
@@ -44,8 +45,7 @@ const transformData = (data: ResultTableStudentType[]) => {
 export const CompletionExport = (data: ResultTableStudentType[], courseName: string): void => {
     const { headers, transformedData } = transformData(data);
     const csv = unparse({ fields: headers, data: transformedData });
-    const date = new Date();
-    const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`; // DD-MM-YYYY format
+    const formattedDate = formatDate(new Date(), "-"); // DD-MM-YYYY in app timezone (Asia/Kolkata)
     const filename = `${courseName}-${formattedDate}.csv`;
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');

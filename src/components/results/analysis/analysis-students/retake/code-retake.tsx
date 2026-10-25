@@ -101,7 +101,7 @@ const CodeRetake = ({ qid, mid, uid, cid }: { qid: string, mid: string, uid: str
                                     </div>
                                     <FormError message={error} />
                                     <FormSuccess message={success} />
-                                    <span className='w-full flex flex-grow gap-2'>
+                                    <span className='grid w-full grid-cols-2 gap-2'>
                                         <DialogClose asChild>
                                             <Button className='w-full'>
                                                 Cancel

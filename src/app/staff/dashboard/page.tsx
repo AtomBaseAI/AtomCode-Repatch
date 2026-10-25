@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import { Layers, Users, CalendarRange, Hexagon, FileVideo, Star, Book } from 'lucide-react';
 import { getCoursesWithMetadata } from '@/data/staff/courses';
 import { auth } from '@/auth';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 // import { getStaffsCount } from '@/data/staffs';
 
 const getSession = async () => {
@@ -98,7 +98,7 @@ const Dashboard = async () => {
                         <CalendarRange className='w-4 h-4' />
                       </span>
                       <p className='font-normal text-sm'>
-                        {format(new Date(course.startdate), 'dd/MM/yyyy')}
+                        {formatDate(course.startdate)}
                       </p>
                     </div>
                     <div className="w-1/2 flex flex-row justify-start items-center">
@@ -106,7 +106,7 @@ const Dashboard = async () => {
                         <CalendarRange className='w-4 h-4' />
                       </span>
                       <p className='font-normal text-sm'>
-                        {format(new Date(course.enddate), 'dd/MM/yyyy')}
+                        {formatDate(course.enddate)}
                       </p>
                     </div>
                   </div>

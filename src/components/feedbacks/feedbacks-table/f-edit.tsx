@@ -84,7 +84,7 @@ const EditFeedback = ({ feedback }: { feedback: z.infer<typeof UpdateFeedbackSch
                         <Pencil className="size-5 bg-transparent text-primary" />
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent aria-describedby={undefined} className="sm:max-w-[425px] max-h-[calc(100vh-2rem)] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Edit : {feedback.title}</DialogTitle>
                     </DialogHeader>

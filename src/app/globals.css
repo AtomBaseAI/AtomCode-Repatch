@@ -123,6 +123,16 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Pointer affordance for every interactive control: Tailwind v4 preflight
+     leaves <button> at the UA default cursor (arrow), so hovering any button
+     (shadcn Button, sidebar icons, topbar power icon, dialog footers, ...)
+     showed an arrow instead of a hand. :not(:disabled) keeps the default
+     arrow (and any explicit cursor-not-allowed utility) on disabled buttons. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
 }
 
 /* Theme-matched scrollbars: slim rounded translucent-violet thumbs, subtle in

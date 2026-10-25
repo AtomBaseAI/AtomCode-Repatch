@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableColumnHeader } from "@/components/data-tables/data-table-column-header"
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 import { ModuleAnalysisSchemaType } from "@/schemas/result-analysis-schema";
 import MAView from "@/components/staff/results/analysis/ma-view";
 
@@ -31,7 +31,7 @@ export const columns: ColumnDef<ModuleAnalysisSchemaType>[] = [
     ),
     cell: ({ row }) => {
       const moduleDate = new Date(row.getValue("moduledate"))
-      const formattedModuletDate = format(new Date(moduleDate), 'dd/MM/yyyy');
+      const formattedModuletDate = formatDate(moduleDate);
 
       return (
         <div className="flex space-x-2">

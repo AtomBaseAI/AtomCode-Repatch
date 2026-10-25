@@ -80,7 +80,7 @@ const UserEdit = ({ student }: { student: z.infer<typeof StudentUpdateSchema> })
                         <Edit className="h-6 w-6 text-white hover:text-gray-200/80" />
                     </div>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[825px]">
+                <DialogContent aria-describedby={undefined} className="sm:max-w-[825px] max-h-[calc(100vh-2rem)] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Edit Profile</DialogTitle>
                     </DialogHeader>
@@ -285,7 +285,7 @@ const UserEdit = ({ student }: { student: z.infer<typeof StudentUpdateSchema> })
                                     <FormSuccess message={success} />
                                 </div>
                                 <div className="w-full mx-auto grid gap-2 grid-cols-2 mt-5">
-                                    <div className="p-1 bg-red-500 rounded-md flex justify-center items-center text-gray-50 font-medium cursor-pointer" onClick={() => { setOpen(!open) }}>Cancel</div>
+                                    <div className="p-1 bg-red-500 rounded-md hover:bg-red-400 flex justify-center items-center text-gray-50 font-medium cursor-pointer" onClick={() => { setOpen(!open) }}>Cancel</div>
                                     <Button disabled={isLoading}>
                                         {isLoading && (
                                             <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />

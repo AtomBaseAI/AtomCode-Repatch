@@ -57,7 +57,7 @@ const SubmitCourseModule = ({ cid, umid }: { cid: string, umid: string }) => {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setSubmitModuleModel(false)} className='bg-red-500 text-white w-full'>Close</AlertDialogCancel>
+                        <AlertDialogCancel onClick={() => setSubmitModuleModel(false)} className='bg-red-500 text-white w-full hover:bg-red-400 hover:text-white'>Close</AlertDialogCancel>
                         <AlertDialogAction onClick={submitModuleData} className='w-full' disabled={isLoading}>
                             {isLoading && (
                                 <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />

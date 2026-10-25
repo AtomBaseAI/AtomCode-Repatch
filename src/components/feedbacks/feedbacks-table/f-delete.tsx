@@ -26,6 +26,7 @@ import { useState, useTransition } from 'react'
 import { FormError } from '@/components/auth/form-error'
 import { FormSuccess } from '@/components/auth/form-success'
 import { deletefeedback } from '@/actions/feedbacks'
+import { ConfirmDeleteInput, isConfirmDeleteText } from '@/components/ui/confirm-delete'
 import { DeleteFeedbackSchema } from '@/schemas/feedback-schema'
 import { toast } from 'sonner'
 const DeleteFeedback = ({ fid }: { fid: string }) => {
@@ -41,9 +42,14 @@ const DeleteFeedback = ({ fid }: { fid: string }) => {
     const [open, setOpen] = useState(false)
     const [error, setError] = useState<string | undefined>("")
     const [success, setSuccess] = useState<string | undefined>("")
+    const [confirmText, setConfirmText] = useState("")
     const handleSubmit = (values: z.infer<typeof DeleteFeedbackSchema>) => {
         setError("")
         setSuccess("")
+        if (!isConfirmDeleteText(confirmText)) {
+            setError("Type the confirmation phrase to enable delete")
+            return
+        }
         startTransition(() => {
             deletefeedback(values.id)
                 .then((data) => {
@@ -60,9 +66,9 @@ const DeleteFeedback = ({ fid }: { fid: string }) => {
     }
     return (
         <>
-            <Dialog open={open} onOpenChange={setOpen} >
+            <Dialog open={open} onOpenChange={(o) => { setConfirmText(""); setOpen(o) }} >
                 <DialogTrigger asChild>
-                    <Button variant='outline' size='icon' className="border-destructive bg-transparent hover:bg-red-700/10">
+                    <Button variant='outline' size='icon' className="border-destructive bg-transparent hover:bg-red-400/20">
                         <Trash className="size-5 bg-transparent text-destructive" />
                     </Button>
                 </DialogTrigger>
@@ -96,13 +102,14 @@ const DeleteFeedback = ({ fid }: { fid: string }) => {
                                     </div>
                                     <FormError message={error} />
                                     <FormSuccess message={success} />
-                                    <span className='w-full flex flex-grow gap-2'>
+                                    <ConfirmDeleteInput value={confirmText} onValueChange={setConfirmText} />
+                                    <span className='grid w-full grid-cols-2 gap-2'>
                                         <DialogClose asChild>
                                             <Button className='w-full'>
                                                 Cancel
                                             </Button>
                                         </DialogClose>
-                                        <Button disabled={isLoading} variant='destructive' className='w-full'>
+                                        <Button disabled={isLoading || !isConfirmDeleteText(confirmText)} variant='destructive' className='w-full'>
                                             {isLoading && (
                                                 <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
                                             )}

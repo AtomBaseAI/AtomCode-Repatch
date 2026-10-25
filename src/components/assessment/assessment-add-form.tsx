@@ -18,6 +18,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TimePicker } from "@/components/time-picker"
 import { DateTimePicker } from "@/components/date-time-picker"
+import { formatDateTime } from '@/lib/utils'
 
 type CData = {
   cid: string
@@ -69,7 +70,7 @@ const AddAssessment = ({ cdata }: { cdata: CData }) => {
           Add Assessment
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent aria-describedby={undefined} className="sm:max-w-[500px] max-h-[calc(100vh-2rem)] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Assessment</DialogTitle>
         </DialogHeader>
@@ -110,14 +111,7 @@ const AddAssessment = ({ cdata }: { cdata: CData }) => {
                       {field.value && (
                         <div className="text-xs text-muted-foreground mt-1">
                           Selected:{" "}
-                          {field.value.toLocaleString("en-GB", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            second: "2-digit",
-                          })}
+                          {formatDateTime(field.value)}
                         </div>
                       )}
                       <FormMessage />

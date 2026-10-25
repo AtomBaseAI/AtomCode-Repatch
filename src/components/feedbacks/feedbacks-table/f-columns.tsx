@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableColumnHeader } from "@/components/data-tables/data-table-column-header"
 import { FeedbackTableType } from "@/schemas/feedback-schema"
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 import DeleteFeedback from "@/components/feedbacks/feedbacks-table/f-delete";
 import EditFeedback from "./f-edit";
 
@@ -48,7 +48,7 @@ export const columns: ColumnDef<FeedbackTableType>[] = [
     cell: ({ row }) => {
 
       const fdate = new Date(row.getValue("date"))
-      const formattedDate = format(new Date(fdate), 'dd/MM/yyyy');
+      const formattedDate = formatDate(fdate);
       return (
         <div className="flex space-x-2">
           <span className="max-w-[500px] truncate font-medium ">

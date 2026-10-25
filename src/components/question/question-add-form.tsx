@@ -199,7 +199,7 @@ const AddQuestion = () => {
                         Add Question
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[100vw] h-[100vh] overflow-y-auto overflow-x-hidden">
+                <DialogContent aria-describedby={undefined} className="sm:max-w-[100vw] h-[100vh] overflow-y-auto overflow-x-hidden">
                     <DialogHeader>
                         <DialogTitle>Add Question</DialogTitle>
                     </DialogHeader>

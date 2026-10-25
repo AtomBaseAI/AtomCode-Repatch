@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 
 export const getAllQuestions = () => {
     try {
-        const questions = db.question.findMany()
+        const questions = db.codeQuestion.findMany()
         return questions
     }
     catch {
@@ -11,7 +11,7 @@ export const getAllQuestions = () => {
 }
 export const getAllQuestionsByLang = (lang: string) => {
     try {
-        const langquestions = db.question.findMany({ where: { lang } })
+        const langquestions = db.codeQuestion.findMany({ where: { lang } })
         return langquestions
     }
     catch {
@@ -20,7 +20,7 @@ export const getAllQuestionsByLang = (lang: string) => {
 }
 export const getQuestionById = async (id: string) => {
     try {
-        const question = await db.question.findUnique({ where: { id } })
+        const question = await db.codeQuestion.findUnique({ where: { id } })
         return question
     }
     catch {
@@ -29,7 +29,7 @@ export const getQuestionById = async (id: string) => {
 }
 export const getQuestionsCount = () => {
     try {
-        const qcount = db.question.count()
+        const qcount = db.codeQuestion.count()
         return qcount
     }
     catch {

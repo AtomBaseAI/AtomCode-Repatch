@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Brain, Maximize2, X } from "lucide-react"
 
 export default function ConceptPreview({ concepturl }: { concepturl: string }) {
@@ -27,9 +27,11 @@ export default function ConceptPreview({ concepturl }: { concepturl: string }) {
                 </div>
             </DialogTrigger>
             <DialogContent
+                aria-describedby={undefined}
                 className={`p-0 border-0 bg-transparent shadow-none max-w-none ${isEnlarged ? "w-[100vw] h-[100vh]" : "w-[50vw] h-[50vh]"
                     } transition-all duration-300 ease-in-out [&>button]:hidden`}
             >
+                <DialogTitle className="sr-only">Concept Preview</DialogTitle>
                 <div className="relative w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                     <div className="absolute top-4 right-6 z-10 flex gap-2">
                         <Button

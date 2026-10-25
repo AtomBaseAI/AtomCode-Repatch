@@ -228,8 +228,8 @@ async function main() {
     });
   }
 
-  if ((await db.question.count({ where: { moduleId: mod1.id } })) === 0) {
-    await db.question.createMany({
+  if ((await db.codeQuestion.count({ where: { moduleId: mod1.id } })) === 0) {
+    await db.codeQuestion.createMany({
       data: [
         {
           title: "Hello Atom",
@@ -323,8 +323,8 @@ async function main() {
       },
     });
 
-  if ((await db.question.count({ where: { assessmentsId: assessment.id } })) === 0) {
-    await db.question.create({
+  if ((await db.codeQuestion.count({ where: { assessmentsId: assessment.id } })) === 0) {
+    await db.codeQuestion.create({
       data: {
         title: "Reverse String",
         description: "Read a line and print it reversed.",

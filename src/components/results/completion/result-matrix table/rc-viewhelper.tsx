@@ -2,7 +2,7 @@
 
 import { BarChart2, FileDown, TrendingUp, Clock, AlertCircle, CheckCircle } from "lucide-react"
 import { usePDF, Margin } from "react-to-pdf"
-import { Dialog, DialogContent, DialogHeader, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/chart"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { formatDate } from '@/lib/utils';
 
 // Mock type for demonstration - replace with your actual type
 type ResultTableModuleType = {
@@ -35,8 +36,7 @@ const RCViewHelper = ({
     name: string
     rollnumber: string
 }) => {
-    const date = new Date()
-    const formattedDate = `${String(date.getDate()).padStart(2, "0")}-${String(date.getMonth() + 1).padStart(2, "0")}-${date.getFullYear()}`
+    const formattedDate = formatDate(new Date(), "-")
     const { toPDF, targetRef } = usePDF({
         filename: `${name}-${rollnumber}-${formattedDate}.pdf`,
         page: {
@@ -57,7 +57,7 @@ const RCViewHelper = ({
                 <DialogTrigger className="bg-primary border p-1 rounded-md text-white font-bold hover:bg-primary/90 transition-colors">
                     <BarChart2 />
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent aria-describedby={undefined} className="sm:max-w-md">
                     <div className="p-6 text-center">
                         <p>No data available to display charts.</p>
                     </div>
@@ -248,7 +248,8 @@ const RCViewHelper = ({
                     <BarChart2 />
                 </DialogTrigger>
                 <DialogHeader className="hidden"></DialogHeader>
-                <DialogContent className="sm:max-w-[100vw] w-full h-screen flex justify-center items-center p-4">
+                <DialogContent aria-describedby={undefined} className="sm:max-w-[100vw] w-full h-screen flex justify-center items-center p-4">
+                    <DialogTitle className="sr-only">Performance Analysis Dashboard</DialogTitle>
                     <div className="w-full h-[95%] overflow-auto">
                         <Card className="w-full min-h-full" ref={targetRef}>
                             <CardHeader className="flex flex-row justify-between items-center">

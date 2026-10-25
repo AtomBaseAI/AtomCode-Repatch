@@ -21,7 +21,7 @@ import { useRouter } from 'next/navigation';
 import { autocompletion, Completion, CompletionSource } from "@codemirror/autocomplete";
 import { enterFullscreen, exitFullscreen, fullscreenCheck } from '@/hooks/fullscreen'
 
-interface Question {
+interface CodeQuestion {
     id: string;
     title: string;
     description: string;
@@ -49,9 +49,9 @@ interface Question {
 }
 
 
-const CodeView = ({ questions, mid, cid, }: { questions: Question[], mid: string, cid: string }) => {
+const CodeView = ({ questions, mid, cid, }: { questions: CodeQuestion[], mid: string, cid: string }) => {
     const { theme } = useTheme();
-    const [questionData, setQuestionData] = useState<Question[]>(questions);
+    const [questionData, setQuestionData] = useState<CodeQuestion[]>(questions);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
     const handleQuestionClick = (index: number) => {
@@ -463,7 +463,7 @@ const CodeView = ({ questions, mid, cid, }: { questions: Question[], mid: string
                 <div className="flex-grow flex flex-col justify-between">
                     {/* question queue */}
                     <nav className="flex flex-col my-4 space-y-4 overflow-y-auto max-h-[calc(100vh-10rem)]">
-                        {questionData.map((question: Question, index: number) => (
+                        {questionData.map((question: CodeQuestion, index: number) => (
                             <Button
                                 key={index}
                                 className={`inline-flex items-center justify-center mx-4 transition-colors border bg-transparent text-primary hover:bg-primary/10 ${currentQuestionIndex === index ? 'bg-primary text-white dark:text-white' : ''}`}
@@ -566,7 +566,7 @@ const CodeView = ({ questions, mid, cid, }: { questions: Question[], mid: string
                 </div>
             </div>
             <AlertDialog open={showModal}>
-                <AlertDialogContent>
+                <AlertDialogContent aria-describedby={undefined}>
                     <AlertDialogHeader>
                         <AlertDialogTitle>
                             <div className='flex flex-row justify-center items-center h-full'>
@@ -615,7 +615,7 @@ const CodeView = ({ questions, mid, cid, }: { questions: Question[], mid: string
             </AlertDialog>
 
             <AlertDialog open={RunTestModel}>
-                <AlertDialogContent>
+                <AlertDialogContent aria-describedby={undefined}>
                     <AlertDialogHeader>
                         <div className='flex flex-grow flex-col justify-around items-center w-full py-2 gap-2'>
                             <div className='w-full h-1/3 flex flex-row flex-grow justify-center items-center p-2 border border-gray-200 rounded-md'>

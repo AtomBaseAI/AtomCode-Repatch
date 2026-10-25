@@ -9,6 +9,7 @@ import {
     AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
+    AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
     ContextMenu,
@@ -69,6 +70,9 @@ const PracticeLayout = ({ children }: { children: React.ReactNode }) => {
                         open={isDialogOpen}
                         onOpenChange={setIsDialogOpen} >
                         <AlertDialogContent onEscapeKeyDown={(e) => e.preventDefault()}>
+                            <AlertDialogTitle className="w-full text-center text-red-500">
+                                Warning !
+                            </AlertDialogTitle>
                             <AlertDialogHeader>
                                 <AlertDialogDescription className="flex flex-col gap-4 justify-center items-center my-8">
                                     <AlertTriangle className="text-yellow-500" />

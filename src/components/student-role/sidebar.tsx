@@ -30,7 +30,7 @@ const Sidebar = () => {
                   <Book fill='none' className='h-6 w-6' />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side='right' className='mb-0'>
+              <TooltipContent side='right'>
                 <p className='z-50'>Courses</p>
               </TooltipContent>
             </Tooltip>
@@ -43,7 +43,7 @@ const Sidebar = () => {
                   <Laptop fill='none' className='h-6 w-6' />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side='right' className='mb-0'>
+              <TooltipContent side='right'>
                 <p className='z-50'>Labs</p>
               </TooltipContent>
             </Tooltip>
@@ -56,7 +56,7 @@ const Sidebar = () => {
                   <FlaskConical fill='none' className='h-6 w-6' />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side='right' className='mb-0'>
+              <TooltipContent side='right'>
                 <p className='z-50'>Assessments</p>
               </TooltipContent>
             </Tooltip>
@@ -77,7 +77,7 @@ const Sidebar = () => {
                   <ThemeToggle />
                 </span>
               </TooltipTrigger>
-              <TooltipContent side='right' className='mb-0 ml-5'>
+              <TooltipContent side='right'>
                 <p className='z-50'>Theme</p>
               </TooltipContent>
             </Tooltip>
@@ -90,7 +90,7 @@ const Sidebar = () => {
                   <Settings fill='none' className='h-6 w-6' />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side='right' className='mb-0'>
+              <TooltipContent side='right'>
                 <p className='z-50'>Settings</p>
               </TooltipContent>
             </Tooltip>

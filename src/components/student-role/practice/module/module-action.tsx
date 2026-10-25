@@ -7,7 +7,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from "@/components/ui/button"
 import { enterFullscreen, exitFullscreen, fullscreenCheck } from "@/hooks/fullscreen"
 import { useEffect, useState, useTransition } from "react"
-import { format, isBefore, isEqual } from 'date-fns';
+import { isBefore, isEqual } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 import {
     Table,
     TableBody,
@@ -154,7 +155,7 @@ const ModuleAction = ({ Module, uid, cid }: { Module: MergedModuleType | null, u
                                                             <CardTitle>{Module?.title} </CardTitle>
                                                             <CardDescription>
                                                                 {Module?.moduledate
-                                                                    ? format(new Date(Module.moduledate), 'dd/MM/yyyy')
+                                                                    ? formatDate(Module.moduledate)
                                                                     : "No Date Available"}
                                                             </CardDescription>
                                                         </CardHeader>
@@ -246,7 +247,7 @@ const ModuleAction = ({ Module, uid, cid }: { Module: MergedModuleType | null, u
                                                                         </AlertDialogDescription>
                                                                     </AlertDialogHeader>
                                                                     <AlertDialogFooter>
-                                                                        <AlertDialogCancel onClick={exitFs} className='bg-red-500 text-white w-full hover:bg-red-600'>Cancel</AlertDialogCancel>
+                                                                        <AlertDialogCancel onClick={exitFs} className='bg-red-500 text-white w-full hover:bg-red-400 hover:text-white'>Cancel</AlertDialogCancel>
                                                                         <AlertDialogAction onClick={routeAtom} disabled={isLoading} className='w-full'>Start</AlertDialogAction>
                                                                     </AlertDialogFooter>
                                                                 </AlertDialogContent>
@@ -268,7 +269,7 @@ const ModuleAction = ({ Module, uid, cid }: { Module: MergedModuleType | null, u
                                                     Practice Locked !
                                                 </p>
                                                 <p className="text-sm font-medium"> (Unlocks on <span className="text-green-600 font-bold"> {Module?.moduledate
-                                                    ? format(new Date(Module.moduledate), 'dd/MM/yyyy')
+                                                    ? formatDate(Module.moduledate)
                                                     : "No Date Available"}</span>)</p>
                                             </CardContent>
                                         </Card>

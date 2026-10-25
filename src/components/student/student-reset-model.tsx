@@ -62,7 +62,7 @@ const ResetPasswordStudent = ({ uid }: { uid: string }) => {
 
             <Dialog open={open} onOpenChange={setOpen} >
                 <DialogTrigger asChild>
-                    <Button variant='outline' className="border-destructive bg-transparent hover:bg-red-700/10 flex justify-center items-center text-destructive">
+                    <Button variant='outline' className="border-destructive bg-transparent hover:bg-red-400/20 flex justify-center items-center text-destructive">
                         <Key className="size-5 bg-transparent text-destructive" /> Reset Password
                     </Button>
                 </DialogTrigger>
@@ -113,7 +113,7 @@ const ResetPasswordStudent = ({ uid }: { uid: string }) => {
                                     </div>
                                     <FormError message={error} />
                                     <FormSuccess message={success} />
-                                    <span className='w-full flex flex-grow gap-2'>
+                                    <span className='grid w-full grid-cols-2 gap-2'>
                                         <DialogClose asChild>
                                             <Button className='w-full'>
                                                 Cancel

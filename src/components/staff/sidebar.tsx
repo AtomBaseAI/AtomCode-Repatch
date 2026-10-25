@@ -69,7 +69,7 @@ const Sidebar = () => {
                   </span>
                 </span>
               </TooltipTrigger>
-              <TooltipContent side='right' className='mb-8'>
+              <TooltipContent side='right'>
                 <p className='z-50'>Courses</p>
               </TooltipContent>
             </Tooltip>
@@ -83,7 +83,7 @@ const Sidebar = () => {
                   </span>
                 </span>
               </TooltipTrigger>
-              <TooltipContent side='right' className='mb-8'>
+              <TooltipContent side='right'>
                 <p className='z-50'>Analysis</p>
               </TooltipContent>
             </Tooltip>
@@ -97,7 +97,7 @@ const Sidebar = () => {
                   </span>
                 </span>
               </TooltipTrigger>
-              <TooltipContent side='right' className='mb-8'>
+              <TooltipContent side='right'>
                 <p className='z-50'>Workspace</p>
               </TooltipContent>
             </Tooltip>
@@ -111,7 +111,7 @@ const Sidebar = () => {
                   </span>
                 </span>
               </TooltipTrigger>
-              <TooltipContent side='right' className='mb-8'>
+              <TooltipContent side='right'>
                 <p className='z-50'>Open IDE</p>
               </TooltipContent>
             </Tooltip>
@@ -139,7 +139,7 @@ const Sidebar = () => {
                   <span className="sr-only">Toggle fullscreen</span>
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side='right' className='ml-5'>
+              <TooltipContent side='right'>
                 <p className='z-50'>Fullscreen</p>
               </TooltipContent>
             </Tooltip>
@@ -153,7 +153,7 @@ const Sidebar = () => {
                   <ThemeToggle />
                 </span>
               </TooltipTrigger>
-              <TooltipContent side='right' className='ml-5'>
+              <TooltipContent side='right'>
                 <p className='z-50'>Theme</p>
               </TooltipContent>
             </Tooltip>

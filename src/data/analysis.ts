@@ -116,13 +116,13 @@ export const getPerformanceAnalysisInsights = async (courseId: string, moduleId:
     try {
         // All five lookups are independent — run them in parallel
         const [codeQuestionsData, courseModuleData, course, module, student] = await Promise.all([
-            db.userQuestionData.findMany({
+            db.userCodeQuestionData.findMany({
                 where: {
                     userId,
                     moduleId
                 },
                 include: {
-                    question: {
+                    codeQuestion: {
                         select: {
                             id: true,
                             title: true,
@@ -167,9 +167,9 @@ export const getPerformanceAnalysisInsights = async (courseId: string, moduleId:
         ]);
 
         const codeData = codeQuestionsData.map((data) => ({
-            questionid: data.question.id,
-            questiontitle: data.question.title,
-            questiondesc: data.question.description,
+            questionid: data.codeQuestion.id,
+            questiontitle: data.codeQuestion.title,
+            questiondesc: data.codeQuestion.description,
             time: data.duration ? parseInt(data.duration) : 0,
             errors: data.errors,
             compiles: data.compiles,

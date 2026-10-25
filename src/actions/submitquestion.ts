@@ -26,7 +26,7 @@ export const submitquestion = async (values: z.infer<typeof UserQuestionDataSche
         testcase2status,
         testcase3status,
     } = validatedFields.data;
-    const existingrecord = await db.userQuestionData.findUnique({
+    const existingrecord = await db.userCodeQuestionData.findUnique({
         where: {
             userId_questionId: {
                 userId: userId,
@@ -35,7 +35,7 @@ export const submitquestion = async (values: z.infer<typeof UserQuestionDataSche
         },
     })
     if (existingrecord && existingrecord.status === 'retake') {
-        await db.userQuestionData.update({
+        await db.userCodeQuestionData.update({
             where: {
                 id: existingrecord.id
             },
@@ -58,7 +58,7 @@ export const submitquestion = async (values: z.infer<typeof UserQuestionDataSche
     } else if (existingrecord?.status === 'submitted') {
         return { error: "Code already Submitted !" }
     }
-    await db.userQuestionData.create({
+    await db.userCodeQuestionData.create({
         data: {
             userId,
             questionId,

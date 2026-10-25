@@ -11,14 +11,14 @@ import CodeEditor from '@/components/ide/codeeditor';
 import CodeRetake from '@/components/results/analysis/analysis-students/retake/code-retake';
 import { usePDF } from 'react-to-pdf';
 import { Button } from '@/components/ui/button';
+import { formatDate } from '@/lib/utils';
 import { FileDown } from 'lucide-react';
 const InsightView = ({ analysisdata, cid, mid, uid }: { analysisdata: any, cid: string, mid: string, uid: string }) => {
     function removeTrailingNewlines(userCode: string | null) {
         if (!userCode) return '';
         return userCode.replace(/\n+$/, '');
     }
-    const date = new Date();
-    const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+    const formattedDate = formatDate(new Date(), "-");
     const { toPDF, targetRef } = usePDF({
         filename: `${analysisdata?.moduletitle}-${analysisdata?.rollnumber}-${formattedDate}.pdf`
     });

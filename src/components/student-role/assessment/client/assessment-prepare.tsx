@@ -135,7 +135,7 @@ const PrepareAssessment = ({ data, aid, cid, uid }: PrepareAssessmentProps) => {
                 // starttime: assessment.starttime,
                 // status: dynamicStatus,
                 // mcqCount: assessment._count.mcqQuestions,
-                // questionCount: assessment._count.questions,
+                // questionCount: assessment._count.codeQuestions,
                 // maxscore:assessment.maxscore,
                 // uaid,
                 // prestarttime,
@@ -282,7 +282,7 @@ const PrepareAssessment = ({ data, aid, cid, uid }: PrepareAssessmentProps) => {
 
             {/* Permissions Modal */}
             <Dialog open={showPermissionModal} onOpenChange={setShowPermissionModal}>
-                <DialogContent>
+                <DialogContent aria-describedby={undefined}>
                     <DialogHeader>
                         <DialogTitle>Permissions Required</DialogTitle>
                     </DialogHeader>

@@ -16,7 +16,7 @@ export const getAllModulesByCourseId = async (id: string) => {
                 concepturl: true,
                 _count: {
                     select: {
-                        questions: true,
+                        codeQuestions: true,
                         mcqQuestions: true,
                     },
                 },
@@ -37,7 +37,7 @@ export const getAllModulesByCourseId = async (id: string) => {
             moduledate: module.moduledate,
             concepturl: module.concepturl,
             maxscore: module.maxscore,
-            questionscount: module._count.questions,
+            questionscount: module._count.codeQuestions,
             mcqcount: module._count.mcqQuestions,
             modulereference: module.reference,
         }));
@@ -61,14 +61,14 @@ export const getModuleQuestionsByModuleId = async (id: string, uid: string) => {
     try {
         const moduleWithQuestions = await db.module.findUnique({
             where: { id },
-            include: { questions: true },
+            include: { codeQuestions: true },
         });
 
         if (!moduleWithQuestions) {
             return null;
         }
 
-        const userQuestionData = await db.userQuestionData.findMany({
+        const userCodeQuestionData = await db.userCodeQuestionData.findMany({
             where: {
                 moduleId: id,
                 userId: uid,
@@ -76,9 +76,9 @@ export const getModuleQuestionsByModuleId = async (id: string, uid: string) => {
             },
         });
 
-        const availableQuestionIds = new Set(userQuestionData.map(qd => qd.questionId));
+        const availableQuestionIds = new Set(userCodeQuestionData.map(qd => qd.questionId));
 
-        const questionsWithStatus = moduleWithQuestions.questions.map((question) => ({
+        const questionsWithStatus = moduleWithQuestions.codeQuestions.map((question) => ({
             ...question,
             submissionstatus: availableQuestionIds.has(question.id),
         }));
@@ -123,11 +123,11 @@ export const getQuestionIdsByModuleId = async (id: string) => {
     try {
         const questions = await db.module.findMany({
             where: { id },
-            select: { questions: { select: { id: true } } },
+            select: { codeQuestions: { select: { id: true } } },
         });
 
         if (questions && questions.length > 0) {
-            const questionIds = questions.flatMap((question) => question.questions.map((q) => q.id));
+            const questionIds = questions.flatMap((module) => module.codeQuestions.map((q) => q.id));
             return questionIds;
         } else {
             return [];

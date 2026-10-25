@@ -1,5 +1,6 @@
 
 import { db } from "@/lib/db";
+import { formatTime, formatTime12 } from "@/lib/utils";
 
 export const getAllAssessmentsByCourseId = async (courseId: string) => {
     try {
@@ -19,23 +20,20 @@ export const getAllAssessmentsByCourseId = async (courseId: string) => {
                 _count: {
                     select: {
                         mcqQuestions: true,
-                        questions: true,
+                        codeQuestions: true,
                     },
                 },
             },
         });
 
         const assessments = assessmentsData.map(assessment => {
-            // Extract HH:MM from the date
-            const dateObj = new Date(assessment.date);
-            const hours = String(dateObj.getHours()).padStart(2, '0');
-            const minutes = String(dateObj.getMinutes()).padStart(2, '0');
-            const starttime = `${hours}:${minutes}`;
+            // Assessment start time in the app timezone (Asia/Kolkata)
+            const starttime = formatTime(assessment.date);
 
             return {
                 ...assessment,
                 mcqcount: assessment._count.mcqQuestions,
-                codecount: assessment._count.questions,
+                codecount: assessment._count.codeQuestions,
                 starttime // Add the new field
             };
         });
@@ -55,16 +53,8 @@ export const getAssessmentById = async (id: string) => {
         });
         if (!assessment) return null;
 
-        // Convert date to 12-hour format HH:MM AM/PM
-        const dateObj = new Date(assessment.date);
-        let hours = dateObj.getHours();
-        const minutes = String(dateObj.getMinutes()).padStart(2, '0');
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-
-        // Convert to 12-hour format
-        hours = hours % 12;
-        hours = hours ? hours : 12; // the hour '0' should be '12'
-        const starttime = `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+        // Start time in the app timezone (Asia/Kolkata), 12-hour format
+        const starttime = formatTime12(assessment.date);
         return {
             ...assessment,
             starttime
@@ -80,10 +70,10 @@ export const getAssessmentCodeQuestionsById = async (assessmentId: string) => {
     try {
         const assessment = await db.assessments.findUnique({
             where: { id: assessmentId },
-            include: { questions: true }
+            include: { codeQuestions: true }
         });
 
-        return assessment?.questions ?? null;
+        return assessment?.codeQuestions ?? null;
     } catch (error) {
         console.error("Error fetching code questions:", error);
         return null;

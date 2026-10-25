@@ -49,7 +49,7 @@ export const mcqdataUpdateModule = async (data: z.infer<typeof upateUserModelSch
 
 
 export const codedataUpdateModule = async (data: z.infer<typeof upateUserModelSchemaCode>) => {
-  const existingrecords = await db.userQuestionData.findMany({
+  const existingrecords = await db.userCodeQuestionData.findMany({
     where: {
       userId: data.userId,
       moduleId: data.moduleId

@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableColumnHeader } from "@/components/data-tables/data-table-column-header"
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 
 
 import { AssessmentTableType } from "@/schemas/assessment-schema";
@@ -36,7 +36,7 @@ export const columns: ColumnDef<AssessmentTableType>[] = [
     ),
     cell: ({ row }) => {
       const moduleDate = new Date(row.getValue("date"))
-      const formattedModuletDate = format(new Date(moduleDate), 'dd/MM/yyyy');
+      const formattedModuletDate = formatDate(moduleDate);
 
       return (
         <div className="flex space-x-2">

@@ -85,7 +85,7 @@ const EditStudentForm = ({ student }: { student: z.infer<typeof StudentUpdateSch
                         <Pencil className="size-5 bg-transparent text-primary" /> Edit
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[825px]">
+                <DialogContent aria-describedby={undefined} className="sm:max-w-[825px] max-h-[calc(100vh-2rem)] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Edit Student</DialogTitle>
                     </DialogHeader>
@@ -338,7 +338,7 @@ const EditStudentForm = ({ student }: { student: z.infer<typeof StudentUpdateSch
                                     <FormSuccess message={success} />
                                 </div>
                                 <div className="w-full mx-auto grid gap-2 grid-cols-2 mt-5">
-                                    <div className="p-1 bg-red-500 rounded-md flex justify-center items-center text-gray-50 font-medium cursor-pointer" onClick={() => { setOpen(!open) }}>Cancel</div>
+                                    <div className="p-1 bg-red-500 rounded-md hover:bg-red-400 flex justify-center items-center text-gray-50 font-medium cursor-pointer" onClick={() => { setOpen(!open) }}>Cancel</div>
                                     <Button disabled={isLoading}>
                                         {isLoading && (
                                             <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />

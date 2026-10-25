@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TimePicker } from "@/components/time-picker"
 import { UpdateAssessmentSchema } from "@/schemas/assessment-schema"
 import { DateTimePicker } from "@/components/date-time-picker"
+import { formatDateTime } from '@/lib/utils'
 
 type AssessmentData = {
     id: string
@@ -72,7 +73,7 @@ const EditAssessment = ({ data }: { data: AssessmentData }) => {
                     Edit Assessment
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent aria-describedby={undefined} className="sm:max-w-[500px] max-h-[calc(100vh-2rem)] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Edit Assessment</DialogTitle>
                 </DialogHeader>
@@ -113,14 +114,7 @@ const EditAssessment = ({ data }: { data: AssessmentData }) => {
                                             {field.value && (
                                                 <div className="text-xs text-muted-foreground mt-1">
                                                     Current:{" "}
-                                                    {field.value.toLocaleString("en-GB", {
-                                                        day: "2-digit",
-                                                        month: "2-digit",
-                                                        year: "numeric",
-                                                        hour: "2-digit",
-                                                        minute: "2-digit",
-                                                        second: "2-digit",
-                                                    })}
+                                                    {formatDateTime(field.value)}
                                                 </div>
                                             )}
                                             <FormMessage />

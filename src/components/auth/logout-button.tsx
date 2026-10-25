@@ -1,19 +1,14 @@
 "use client"
-import { logout } from "@/actions/logout";
-import { Power } from 'lucide-react'
+import ConfirmLogout from "@/components/auth/confirm-logout"
 
+/**
+ * Topbar logout entry — now opens a confirmation dialog first.
+ * ConfirmLogout owns the power-icon trigger + the confirm/cancel popup,
+ * so the same flow is applied to every role (admin / staff / student)
+ * through the shared Topbar.
+ */
 const LogoutButton = () => {
-    const handleLogout = () => {
-        logout()
-    }
-    return (
-        <button className="relative p-2 text-gray-400 hover:bg-red-500 hover:text-white focus:bg-gray-100 focus:text-gray-600 rounded-full"
-            onClick={handleLogout}>
-            <span className='h-6 w-6'>
-                <Power fill='none' />
-            </span>
-        </button>
-    )
+    return <ConfirmLogout />
 }
 
 export default LogoutButton

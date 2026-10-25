@@ -126,7 +126,7 @@ const EditQuestionForm = ({ question }: { question: z.infer<typeof QuestionUpdat
                         <Pencil className="size-5 bg-transparent text-primary" /> Edit
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[100vw] h-[100vh] overflow-y-auto overflow-x-hidden">
+                <DialogContent aria-describedby={undefined} className="sm:max-w-[100vw] h-[100vh] overflow-y-auto overflow-x-hidden">
                     <DialogHeader>
                         <DialogTitle>Edit Question</DialogTitle>
                     </DialogHeader>

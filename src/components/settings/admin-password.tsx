@@ -65,7 +65,7 @@ const AdminPassword = ({ uid }: { uid: string }) => {
                         <Key className="h-6 w-6 text-white hover:text-gray-200/80" />
                     </div>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent aria-describedby={undefined} className="sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Reset Password</DialogTitle>
                     </DialogHeader>
@@ -131,7 +131,7 @@ const AdminPassword = ({ uid }: { uid: string }) => {
                                     </div>
                                     <FormError message={error} />
                                     <FormSuccess message={success} />
-                                    <span className='w-full flex flex-grow gap-2'>
+                                    <span className='grid w-full grid-cols-2 gap-2'>
                                         <DialogClose asChild>
                                             <Button className='w-full'>
                                                 Cancel

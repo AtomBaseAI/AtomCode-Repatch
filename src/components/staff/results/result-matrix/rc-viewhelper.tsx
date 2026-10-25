@@ -6,6 +6,7 @@ import {
     Dialog,
     DialogContent,
     DialogHeader,
+    DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, LabelList, Line, LineChart, XAxis, YAxis } from "recharts"
@@ -27,12 +28,12 @@ import {
 } from "@/components/ui/chart"
 import { Button } from '@/components/ui/button';
 import { ResultTableModuleType } from '@/schemas/result-matrix-schema';
+import { formatDate } from '@/lib/utils';
 
 
 const RCViewHelper = ({ mdata, name, rollnumber }: { mdata: ResultTableModuleType[] , name: string, rollnumber: string }) => {
 
-    const date = new Date();
-    const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`; // DD-MM-YYYY format
+    const formattedDate = formatDate(new Date(), "-"); // DD-MM-YYYY in app timezone (Asia/Kolkata)
     const { toPDF, targetRef } = usePDF({
         filename: `${name}-${rollnumber}-${formattedDate}.pdf`,
         // resolution: Resolution.EXTREME,
@@ -94,8 +95,9 @@ const RCViewHelper = ({ mdata, name, rollnumber }: { mdata: ResultTableModuleTyp
                 <DialogTrigger className='bg-primary border p-1 rounded-md text-white font-bold'>
                     <BarChart2 />
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[95vw] w-full h-[95vh] flex justify-center items-center">
-                    <DialogHeader className='w-5/6'>
+                <DialogContent aria-describedby={undefined} className="sm:max-w-[95vw] w-full max-h-[95vh] flex justify-center overflow-y-auto">
+                    <DialogHeader className='w-5/6 my-auto'>
+                        <DialogTitle className="sr-only">Modules Matrix Chart</DialogTitle>
                         <Card className='w-full' ref={targetRef}>
                             <CardHeader className='flex flex-row justify-between items-center'>
                                 <div>

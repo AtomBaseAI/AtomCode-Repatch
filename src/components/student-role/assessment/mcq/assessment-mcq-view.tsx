@@ -245,7 +245,7 @@ const AssessmentMCQView = ({ data, uaid, status }: { data: MCQ[], uaid: string, 
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                    <AlertDialogCancel onClick={() => setSubmitTestModel(false)} className='bg-red-500 text-white w-full'>Close</AlertDialogCancel>
+                                    <AlertDialogCancel onClick={() => setSubmitTestModel(false)} className='bg-red-500 text-white w-full hover:bg-red-400 hover:text-white'>Close</AlertDialogCancel>
                                     <AlertDialogAction onClick={submitMCQ} className='w-full' disabled={isLoading}>
                                         {isLoading && (
                                             <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />

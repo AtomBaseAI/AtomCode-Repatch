@@ -504,3 +504,196 @@ Work Log:
 
 Stage Summary:
 - Every icon inside a Button now renders at its authored size: default 16px only when no size class is present; table action icons are uniform 20px glyphs in 36px buttons that fit their cells. Applies app-wide (admin + staff + student) since the fix lives in button.tsx + shared table columns
+
+---
+
+Task ID: setup-1
+Agent: main (orchestrator)
+Task: Delete default scaffolding, clone https://github.com/AtomBaseAI/AtomCode-Repatch, move all files/folders to project root, generate essential .env, run the app.
+
+Work Log:
+- Killed the running template dev server before any file operations
+- Cloned AtomCode-Repatch to /tmp (repo = unified Next.js 16 LMS app + Core_SRC reference apps + worklog/docs + prebuilt seeded db/custom.db)
+- Deleted template scaffolding: src/, prisma/, db/, public/, examples/, download/, tests/, tool-results/, mini-services/, node_modules/, .next/, .git/, package.json, tsconfig.json, next.config.ts, tailwind.config.ts, eslint.config.mjs, postcss.config.mjs, components.json, bun.lock, .env, .gitignore
+- Preserved sandbox infrastructure: Caddyfile (gateway), .zscripts/, skills/, upload/, dev.log
+- Moved ALL repo files (including .git history, HEAD=7c9c1eb "theme patch") to /home/z/my-project; repo's Caddyfile is byte-identical to the sandbox gateway config
+- Generated .env per docs/TEST-CREDENTIALS.md: DATABASE_URL=file:/home/z/my-project/db/custom.db, AUTH_SECRET (openssl rand -base64 32), NEXT_PUBLIC_LAMBDA_URL/MULTI_URL empty (external judge unavailable in sandbox), OPENAI_API_KEY empty (AI tutor disabled), OPENAI_MODEL=gpt-4o-mini, optional branding overrides commented out
+- Added .gitignore (node_modules, .next, .env, logs, db journals)
+- bun install: 854 packages; bunx prisma generate OK
+- Verified seeded SQLite DB: Admin=2, Staff=2, User=3, Course=1, Module=2, Question=3, MCQQuestion=3, Assessments=1 (matches docs)
+- Started dev server (next dev -p 3000 --webpack); GET / -> 307 -> /login 200
+- Browser-verified: /login renders "Atom Code Campus"; admin@atom.com/Admin@Atom -> /admin/dashboard with live stat cards (1 course, 3 students, 2 staffs, 3 questions); /admin/courses data table shows "Full Stack Java"; student@atom.com/User@Atom -> /student/dashboard as "Riya Student" (1 enrolled/1 active/0 completed); middleware auth redirects verified (authenticated user bounced from /login back to dashboard); zero console errors; dev.log shows healthy Prisma queries
+
+Stage Summary:
+- App is live on port 3000 from the cloned repo at project root; git history preserved
+- Login: admin@atom.com/Admin@Atom, staff@atom.com/Staff@Atom, student@atom.com/User@Atom (docs/TEST-CREDENTIALS.md); assessment access key 123456
+- Known sandbox limitation: code-execution judge (NEXT_PUBLIC_LAMBDA_URL/MULTI_URL) and AI tutor (OPENAI_API_KEY) are external services, left empty -> code run buttons and AI sheet degrade gracefully
+
+---
+
+Task ID: run-1
+Agent: main (orchestrator)
+Task: Run the app and check for errors.
+
+Work Log:
+- Confirmed server was up; scanned dev.log (clean, zero app errors)
+- Browser sweep of ALL routes: 8 admin pages (/admin/{dashboard,courses,questions,results,staffs,students,settings,ide}), 6 staff pages (/staff/{dashboard,courses,results,workspace,settings,ide}), student pages (/student/{dashboard,courses,courses/[cid]/module,assessments,assessment list,lab,settings,practice/[cid]/[mid],practice code view}) — all render with real seeded data, ZERO page errors
+- Flow tests: admin login -> dashboard stats; course Modules dialog (Full Stack Java / Java Basics); student course page (0%, 2 modules); assessments list shows seeded "Unit Test 1" with correct "Expired" state (date passed); practice proctor gate Continue works; code practice loads CodeMirror with "Hello Atom" question; staff workspace loads selector; staff IDE loads CodeMirror + Run/Custom Inputs/Output
+- FOUND & FIXED 1 issue: Radix accessibility error "AlertDialogContent requires a AlertDialogTitle" in src/app/student/practice/[cid]/[mid]/layout.tsx (proctor dialog). Added AlertDialogTitle "Warning !" matching the sibling assessment proctor dialog pattern. Re-verified: console error gone.
+- FOUND: dev server killed twice by Linux OOM killer (dmesg: "Out of memory: Killed process next-server", RSS ~2.9GB) during heavy webpack compiles while Chromium was open. NOT an app bug — 4GB sandbox limit. Mitigation: restarted with NODE_OPTIONS=--max-old-space-size=1536 (tighter heap -> earlier GC). Repo's package.json script left untouched. All heavy pages (staff IDE, code practice) then compiled+rendered without OOM.
+- Verified known/documented degradation: with empty NEXT_PUBLIC_LAMBDA_URL, student code "Run" POSTs to relative "undefined/java" -> 404, handled gracefully (no crash). External judge service is not available in sandbox (per repo docs, empty values are the intended setup).
+- Pre-existing lint note: react-hooks/set-state-in-effect errors exist in upstream proctor layouts (assessment + practice) — intentional mount-time fullscreen check pattern; does not affect runtime; left as upstream.
+- Post-sweep: dev.log shows only expected 404 (judge) — no 500s, no compile errors; server healthy (HTTP 200).
+
+Stage Summary:
+- App is error-free at runtime across all three roles; one a11y fix applied (practice proctor dialog title)
+- Sandbox constraint documented: keep browser closed during heavy first-compiles or use the 1536MB heap override if OOM recurs; repo scripts unchanged
+- Code judge + AI tutor remain external-service features (graceful degradation confirmed)
+
+---
+
+Task ID: fix-1
+Agent: main (orchestrator)
+Task: Fix hydration error — AnimatedThemeToggler icon (Sun/Moon) mismatch between server HTML and client.
+
+Work Log:
+- Root cause: src/components/theme-toggle.tsx passed `theme={resolvedTheme === "dark" ? "dark" : "light"}` to the controlled AnimatedThemeToggler. next-themes' `resolvedTheme` is undefined during SSR -> server rendered Moon (light default); on the client it resolves to the stored theme -> dark users got Sun -> React hydration mismatch (recoverable error, tree regenerated client-side).
+- Fix (canonical next-themes pattern): added `mounted` guard in ThemeToggle — SSR + first client render output a stable placeholder button (identical classes + Moon icon + sr-only label, disabled) that exactly matches SSR output; after mount, swap in the real AnimatedThemeToggler with the resolved theme. No changes to the vendored magicui component; all ThemeToggle usages (admin/staff/student sidebars, topbar, auth pages) fixed at once.
+- Browser verification (repro = localStorage theme=dark, reload): /login clean; /admin/dashboard (reported failing route) clean — zero hydration errors, zero console errors; theme toggle flips dark->light->dark with animated transition; after dark reload Sun renders correctly with no mismatch.
+- dev.log: no new errors; server healthy.
+
+Stage Summary:
+- Hydration mismatch eliminated at its single source (ThemeToggle); toggle functionality and styling unchanged (placeholder is pixel-identical to SSR output)
+
+---
+
+Task ID: refactor-1
+Agent: main (orchestrator)
+Task: Rename the code-question entity (was 'Question', used for coding questions with test cases) to make it explicit, everywhere in schema + code, without changing app behavior or losing data.
+
+Work Log:
+- Scanned schema + entire src/ + prisma/seed.ts: mapped every usage of Question / UserQuestionData models, db accessors, include/select keys, _count keys, relation property access, local types
+- Schema (prisma/schema.prisma): model Question -> CodeQuestion with @@map("Question"); model UserQuestionData -> UserCodeQuestionData with @@map("UserQuestionData"); relation fields renamed TS-side: Module.questions -> codeQuestions, Module/Assessments/CodeQuestion.userQuestionData -> userCodeQuestionData, User.userQuestionData -> userCodeQuestionData, UserCodeQuestionData.question + userAssessmentCodeData.question -> codeQuestion. FK scalar column questionId intentionally KEPT (no DB change); MCQ naming untouched; physical tables untouched via @@map
+- prisma db push after generate: "database is already in sync" — zero DDL, all seeded data preserved (verified: 3 code questions, relations resolve, e.g. Hello Atom -> Java Basics)
+- Code refactor (13 files): prisma/seed.ts, actions/{question,submitquestion,submitmodule,analysis,module,assessment}.ts, data/{questions,modules,assessments,analysis}.ts, data/student/{modules,assessments}.ts, components code-view/assessment-code-view local interfaces Question -> CodeQuestion (db.question -> db.codeQuestion, db.userQuestionData -> db.userCodeQuestionData, include/connect/_count keys questions -> codeQuestions, data.question.* -> data.codeQuestion.*)
+- Deliberately unchanged: URL routes (/admin/questions etc.), file names, UI strings, payload/zod field questionId, @@unique userId_questionId, mapped display keys (questionid/questiontitle in analysis), component prop names
+- Verification: exhaustive leftover grep CLEAN; bunx tsc --noEmit -> zero app errors (only pre-existing skills/ scripts); lint changed files 0 errors
+- Browser-verified all question flows: /admin/questions (list), /admin/dashboard counts (3 Questions), admin module code page (2 problems), admin assessment code page (Reverse String), admin question edit page, staff module code page, staff results + module analysis, student module page (Code Questions: 2), student practice overview (Programs: 2), student code practice view (CodeMirror + Hello Atom), student assessments (1 Code)
+- Ops note: dev server OOM-killed twice more by sandbox during the heaviest page compile (code practice w/ CodeMirror) when Chromium was open concurrently; dmesg confirms kernel kills (~2.8GB RSS on 4GB box). Mitigation used: restart server, warm the heavy route via authenticated curl (browser closed), then verify interactively. App code itself has zero errors.
+
+Stage Summary:
+- Code-question entity is now explicitly CodeQuestion/UserCodeQuestionData across schema + code; MCQ naming untouched; DB data 100% preserved (no migration); all flows browser-verified working exactly as before
+
+---
+Task ID: fix-2
+Agent: main (orchestrator)
+Task: "Some popup modals are glitching — scan for all modals and fix all" (user screenshot: Delete Question dialog rendering with the Delete button overflowing outside the dialog box, overlapping the table behind it).
+
+Work Log:
+- Reproduced live via agent-browser: q-delete dialog on /admin/questions showed the Cancel/Delete pair overflowing the 425px dialog. Root cause chain: repo Button base includes `shrink-0` (upstream shadcn does too) + footer pattern `<span class='w-full flex flex-grow gap-2'>` with TWO `w-full` Buttons → flex-shrink:0 prevents shrinking → second button renders outside the dialog (light + dark themes).
+- Static scan found the same copy-pasted footer in 19 dialog files (all delete confirms, password resets, code-retake). Fixed ALL 19 by replacing the span wrapper with `grid w-full grid-cols-2 gap-2` (grid tracks can't overflow; preserves the side-by-side equal-width design; no cascade-order dependence on flex-1 vs shrink-0). Browser-verified contained buttons on q-delete + mc-delete + settings/admin-password + student user-password; all inside.
+- Second glitch class — fixed-height dialogs clipping content: mcq-add-form/mcq-edit-form (`h-[85vh]`, no scroll → Topic/Subtopic inputs half-clipped, submit button unreachable). Changed to `max-h-[85vh] overflow-y-auto`; verified scroll + submit reachable.
+- staff/results rc-viewhelper chart dialog (`h-[95vh] flex items-center`, 42rem card → clipped top+bottom, unreachable content on short viewports): → `max-h-[95vh] flex justify-center overflow-y-auto` + `my-auto` child (correct flex-overflow centering) + added sr-only DialogTitle (file had none). Verified: scrolls, bottom PDF button reachable, centered when it fits.
+- Viewport-clipping safety on all tall 425px/500px/825px form dialogs (student/staff/course/module/assessment add+edit, reference/feedback add, f-edit, user-edit): added `max-h-[calc(100vh-2rem)] overflow-y-auto`. Verified Add Student: no viewport clipping at 577px height, Create reachable by internal scroll; Add Assessment same. Full-screen `h-[100vh]` dialogs (question add/edit, mc/mq/aq previews, admin insights) left untouched — already scrollable by design.
+- A11y/console sweep of ALL Dialog/AlertDialog usages: 3 files lacked a Title (error) — concept-preview (student), both rc-viewhelper files → added sr-only DialogTitle; 31+ usages lacked Description (Radix dev warning on every open) → added Radix-official `aria-describedby={undefined}` suppressor to exactly the no-Description dialogs (including code-view's 2 AlertDialogs). Console after fixes: zero Missing-Title errors, zero Missing-Description warnings.
+- Fixed my own patch regression (double `>>` tag close from scripted className insert) across 14 files; `bunx tsc --noEmit` clean; zero Parsing errors in lint; remaining lint errors are pre-existing upstream patterns (documented policy).
+- Ops: 4 more sandbox OOM kills (dmesg, next-server ~2.8GB RSS) during heavy compiles (mcq page, insights, completion) with Chromium open — restarted each time with NODE_OPTIONS=--max-old-space-size=1536; warmed routes via authenticated curl (browser closed) before browser verification. Deliberate data-safety choice: verified form wiring via zod validation errors instead of mutating seeded data; DB re-checked clean (2 seeded modules only).
+
+Stage Summary:
+- All app modals (Dialog + AlertDialog) audited: button-overflow fixed in 19 files, scroll/clip fixed in 17 form dialogs + staff chart dialog, a11y titles added in 3 files, Radix description warnings suppressed in 30+ files. Zero modal console noise; all buttons contained; tall dialogs scroll. MCQ previews / question full-screen dialogs intentionally unchanged. DB untouched.
+
+---
+Task ID: fix-3
+Agent: main (orchestrator)
+Task: "Admin leftbar tooltip (hover) alignment not showing perfectly — fix that; delete confirmation popups must require typing a phrase like 'confirm delete'; input shows camel case (capitals) but accepts only small letters; apply to ALL delete models."
+
+Work Log:
+- Tooltip root cause (measured live): nav TooltipContent carried `mb-8` (and bottom cluster `ml-5`, student sidebar `mb-0`/`mb-0 ml-5`) margin hacks → floating-ui centers the MARGIN box on the trigger, so `mb-8` shifted every tooltip 16px above icon center (tooltip center y=88 vs icon center y=104, confirmed by getBoundingClientRect + screenshot). Removed all margin hacks from all 3 sidebars (admin `src/components/sidebar.tsx`, `src/components/staff/sidebar.tsx`, `src/components/student-role/sidebar.tsx`, 21 TooltipContent total); Radix `side='right'` now centers natively.
+- Browser-verified post-fix: admin (Questions icon), staff (all 7: Courses/Analysis/Workspace/Open IDE/Fullscreen/Theme/Settings) and student (all 5) tooltips — tooltipCenter === triggerCenter exactly (aligned:true everywhere) in dark theme; light theme spot-checked visually.
+- New shared component `src/components/ui/confirm-delete.tsx`: exports `CONFIRM_DELETE_PHRASE="confirm delete"`, `CONFIRM_DELETE_HINT="Confirm Delete"` (camel-case display), `normalizeConfirmText()` (folds to lowercase, strips non a-z/space, collapses spaces, caps length), `isConfirmDeleteText()`, and `<ConfirmDeleteInput>` (label: Type "Confirm Delete" below to enable delete; input placeholder shows camel-case "Confirm Delete"; every keystroke/paste sanitized to lowercase letters only; red aria-invalid ring + hint while incomplete; emerald border when matched; auto useId).
+- Wired typed confirmation into ALL 13 delete dialogs: course c-delete, module m-delete, question q-delete, mcq mc-delete, assessment a-delete, course-student cs-delete, module-question mq-delete, assessment-question aq-delete, reference r-delete, feedback f-delete, staff stf-delete, student s-delete, course-staff cstf-delete (the 4 *-deletehelper.tsx files are thin param-bridge wrappers → inherit automatically). Per file: import, `confirmText` state, `onOpenChange` resets input on open/close, `<ConfirmDeleteInput>` after FormSuccess, Delete `disabled={isLoading || !isConfirmDeleteText(confirmText)}`, plus submit-guard in handleSubmit (blocks Enter-key implicit submission bypass with a FormError). Password-reset dialogs + submit/retake confirmations are NOT deletes → untouched.
+- Verification (agent-browser): Delete Student dialog — initial state Delete disabled; typing camel-case "Confirm Delete" → stored "confirm delete" + button enabled + green border; incomplete "confirm del" → button disabled + inline hint "Must match \"confirm delete\" exactly (small letters only)."; Enter with incomplete phrase → form not submitted (disabled default button) + dialog stays open. FULL E2E on disposable entity: created course "ZZZ Temp Course" (title/Java/start 01/10/2026/end 30/10/2026 — note end-date calendar disables dates before sandbox 'today'), typed "CONFIRM DELETE" → auto-lowercased & enabled → Delete → toast "Course Deleted !", row gone, dialog closed. Seed data untouched (only temp course created+deleted; 3 students / 1 course intact).
+- Ops: dev server had died again before verification (log clean, process gone) → restarted with NODE_OPTIONS=--max-old-space-size=1536. Lint: zero issues in all touched files (remaining 115 problems are pre-existing upstream patterns per policy). tsc clean for src/ (only pre-existing skills/ errors).
+
+Stage Summary:
+- Sidebar tooltips now pixel-centered on their icons across admin/staff/student (root-caused margin-box centering bug, fix verified numerically + screenshots).
+- Every delete modal in the app now requires typing the confirmation phrase: input displays camel-case "Confirm Delete" (label + placeholder) while physically accepting only lowercase letters; Delete stays disabled until exact lowercase match; double-gated (disabled button + handleSubmit guard); state resets on each open. Full delete flow E2E-verified with a disposable course; DB otherwise untouched.
+
+---
+Task ID: feat-1
+Agent: main (orchestrator)
+Task: "For all type of user roles implement logout confirmation popup (no text type needed, just buttons enough)."
+
+Work Log:
+- Scanned all logout entry points (rg logout/signOut across src/): the ONLY auth-logout control is the shared LogoutButton in src/components/topbar.tsx, rendered by all 3 role layouts (admin/staff/student layout.tsx) → one shared component covers every role; code-view.tsx LogOut icon is a practice-view exit (route nav), not auth logout → untouched.
+- New reusable component src/components/auth/confirm-logout.tsx: owns the power-icon trigger (identical styling/classes + aria-label "Log out" + aria-haspopup) and a Radix AlertDialog confirm popup — title "Confirm Logout", description "Are you sure you want to log out? You will need to sign in again to access your account.", buttons-only footer (NO typed phrase per user requirement) using the fix-2 verified grid-cols-2 pattern (Cancel outline + destructive Logout with LogOut icon).
+- Safety/UX details: controlled dialog open state; onOpenChange guarded so Escape/cancel cannot dismiss mid-logout (no half-signed-out state); while logging out the Logout button shows a Loader spinner + "Logging out..." and both buttons are disabled; on server-action failure the dialog restores for retry; calls existing @/actions/logout (signOut redirect:false + redirect /login).
+- logout-button.tsx now renders <ConfirmLogout /> (export contract with Topbar unchanged — zero layout edits needed).
+- Verification (agent-browser, all 3 roles): admin → dialog appears (alertdialog "Confirm Logout" + Cancel + Logout in snapshot), screenshot confirms clean centered 425px dialog, Cancel keeps session on /admin/dashboard; Logout → /login. staff (staff dashboard) same flow → /login. student (student dashboard) same flow → /login. Console + page errors: ZERO; dev.log clean. tsc: only pre-existing skills/ errors; lint: zero issues in touched files.
+
+Stage Summary:
+- Every role (admin/staff/student) now gets a buttons-only logout confirmation popup via the shared Topbar LogoutButton: power icon opens "Confirm Logout" dialog, Cancel stays signed in, Logout signs out and redirects to /login with spinner feedback. Reusable ConfirmLogout component available for any future logout entry points.
+
+---
+Task ID: feat-2
+Agent: main (orchestrator)
+Task: "While hovering on top of a button apply pointer css; also all danger buttons (logout, delete) turn light red on hover."
+
+Work Log:
+- Cursor: Tailwind v4 preflight leaves <button> at the UA default arrow cursor. Added a global base rule in globals.css @layer base: `button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer }` — covers shadcn Buttons AND plain <button> elements (sidebar icons, topbar power icon, user menu, pagination). :not(:disabled) keeps arrow on disabled buttons (and their cursor-not-allowed utilities). Also added explicit `cursor-pointer` to the shadcn Button base string for self-documentation.
+- Danger hover (light red): root cause of "no visible hover" = destructive variant used `hover:bg-destructive/90` (barely perceptible). Since ALL danger buttons share the central Button destructive variant (13 delete dialogs + logout confirm + 5 password-reset dialogs verified via grep, single+double quote patterns), one change in button.tsx covers everything: `hover:bg-red-400 dark:hover:bg-red-400/80` (destructive base is red-500 in light / dark muted red; red-400 = clearly lighter, white text stays legible).
+- Consistency sweep (sed + manual, verified by rg): 15 danger icon triggers (13 delete + 2 password-reset) `hover:bg-red-700/10` → `hover:bg-red-400/20`; topbar logout power icon `hover:bg-red-500` → `hover:bg-red-400` (confirm-logout.tsx); 8 red exam-dialog Close/Cancel buttons (submit-module, top-bar, mcq-view, code-view x2, assessment-code-view x2, assessment-mcq-view) got `hover:bg-red-400 hover:text-white` (previously outline's gray hover leaked through); module-view `hover:bg-red-500/80` → `hover:bg-red-400`; module-action `hover:bg-red-600` → `hover:bg-red-400`; 3 red Cancel pills (student/staff edit-forms, user-edit) got `hover:bg-red-400`. Left alone: badge.tsx (badge not button), red-700 PDF download buttons (not danger), status badges/indicators, disabled cursor-not-allowed buttons.
+- Verification (agent-browser, admin/students + logout dialog): global cursor rule LIVE (fresh <button> probe computes cursor:pointer; a11y tree shows [cursor:pointer] on all nav/buttons); dialog Cancel/Delete compute cursor:pointer. All 3 new hover rules confirmed in the live CSS bundle with correct declarations: `.hover\:bg-red-400:hover { background-color: var(--color-red-400) }`, `.hover\:bg-red-400\/20:hover { ... 20% mix }`, `.dark\:hover\:bg-red-400\/80:hover { ... 80% }` (Tailwind v4 gates them behind @media (hover: hover) which this headless env reports as false — headless limitation, not an app bug). Forced-declaration screenshot proves the visual: Logout button renders LIGHT RED (oklch 0.704 0.191 22.216 = red-400) with legible white text. Delete Student dialog re-verified: opens, typed-confirmation gating intact, Cancel closes. Console: zero errors/warnings; dev.log clean. tsc clean (only pre-existing skills/ errors); lint: only pre-existing upstream set-state-in-effect patterns (my edits were class strings only).
+
+Stage Summary:
+- Every button in the app now shows the pointer cursor on hover (global base rule + Button base).
+- Every danger button (logout power icon + Logout confirm, all 13 delete dialog Delete buttons + trash triggers, password-reset danger buttons, exam Close/Cancel red buttons) now turns light red (red-400) on hover in light mode (red-400/80 in dark), replacing the near-invisible /90 and inconsistent gray/darker hovers.
+
+---
+Task ID: fix-4
+Agent: main (orchestrator)
+Task: Fix recoverable hydration error on /admin/courses/[cid]/feedbacks — "server rendered text didn't match the client" (server rendered 21/10/2026, client 22/10/2026) at f-columns.tsx date cell.
+
+Work Log:
+- Root cause: date-fns `format(new Date(x), 'dd/MM/yyyy')` renders in the HOST's local timezone. Server = UTC; user's browser = Asia/Calcutta (UTC+5:30). Any instant between 18:30–24:00 UTC therefore renders as the PREVIOUS day on the server and the NEXT day in the browser → SSR/hydrate text mismatch. The feedback row's seeded "now"-ish timestamp fell in that window, surfacing the latent bug.
+- Fix: new shared deterministic formatter `formatDate()` in src/lib/utils.ts — Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Calcutta', day: '2-digit', month: '2-digit', year: 'numeric' }) → always "dd/MM/yyyy", identical on server & client; null/invalid-safe (returns ""). Asia/Calcutta chosen deliberately: the app operates on IST calendar dates (date pickers submit IST-midnight instants), so form-picked dates render exactly as picked AND UTC-midnight seeded dates render the same calendar day (verified: '2026-10-21T19:00Z'→22/10/2026, '2026-10-16T00:00Z'→16/10/2026, IST-midnight→21/10/2026 in bun).
+- Swept the SAME latent bug everywhere (rg `format(new Date`): replaced in 10 files / 16 call sites — f-columns (reported error), admin+staff c-columns (start/end), admin+staff m-columns, a-columns, admin+staff ma-columns, staff dashboard (server component, aligned for app-wide consistency), student module-action (2 sites). Imports swapped: 9 files date-fns `format` → `@/lib/utils` formatDate; module-action keeps isBefore/isEqual, adds formatDate. Deliberately untouched (no hydration risk): data/student/assessments.ts (server-only data prep), ui/calendar + chart + student dialogs/forms toLocale* (client-only render), custom-calender month header (now-based, different class, not reported).
+- Verification: `rg "format(new Date"` → zero leftovers; tsc clean; lint clean on touched files. Browser (agent-browser): the EXACT failing page /admin/courses/[cid]/feedbacks → ZERO hydration errors/warnings in console, dates render 22/10/2026 (IST, matching prior client output) in both rows; /admin/courses seeded dates unchanged (16/10/2026, 22/12/2026); staff /dashboard renders 16/10/2026 + 22/12/2026 with zero console errors. dev.log clean.
+
+Stage Summary:
+- All table/inline "dd/MM/yyyy" date rendering is now timezone-pinned (Asia/Calcutta) via one shared `formatDate()` helper — SSR and client always agree, eliminating the whole class of timezone hydration mismatches; displayed dates for IST users are unchanged or more correct (form-picked dates now match the picker on the server too).
+
+---
+Task ID: feat-3
+Agent: main (orchestrator)
+Task: "In app, instead of using local system's date and time use server date and time (Asia/Kolkata)."
+
+Work Log:
+- Established src/lib/utils.ts as the single APP_TIMEZONE toolkit (Asia/Kolkata — same IANA zone as the Asia/Calcutta constant it replaces): exported APP_TIMEZONE; formatDate(value, separator "/"|"-") via formatToParts; NEW formatDateTime ("dd/MM/yyyy, HH:mm:ss", h23), formatTime ("HH:mm"), formatTime12 ("hh:mm AM/PM" uppercase meridiem — preserves legacy admin format); NEW getISTParts() returning {year,month,day,hour,minute,second,dayKey:"YYYY-MM-DD"} — the replacement for date.getFullYear()/getMonth()/getDate()/getHours(); NEW istWallClock(y,m,d,h,min,s) building the exact instant for IST wall-clock (+05:30 fixed offset, no DST); NEW istTodayLocalStart() = local-midnight of the current IST calendar day for picker "disable past" logic.
+- Admin assessment times were SERVER-LOCAL (UTC!) before: data/assessments.ts starttime blocks (getHours/getMinutes on the server) → formatTime / formatTime12 (IST). Verified: seeded assessment 2026-10-22T18:29Z now shows 23:59 (was 18:29) in the admin table and 11:59 PM (12h) via bun unit check.
+- Student assessment status bug fixed while sweeping: data/student/assessments.ts derived assessmentDate via toISOString() (UTC date) and compared it against the IST todayDate → evening/night IST assessments got wrong upcoming/expired status; both sites now use getISTParts(date).dayKey. Also replaced the file's local UTC-getter formatDate (card "assessmentdate" displayed the UTC calendar date) with the shared IST formatDate; deleted the dead local helper.
+- date-time-picker.tsx (admin assessment date+time picker) fully IST-pinned: time extraction reads getISTParts (was local getHours); combineDateTime interprets the picked calendar day + typed time as IST wall clock via istWallClock (was local setHours → browser-TZ instant); trigger label uses shared IST formatDate; past-day disabling anchored to istTodayLocalStart.
+- Student dashboard custom-calender.tsx fully rewritten around IST dayKeys: viewed month from getISTParts of the anchor; grid cells built as UTC-midnight anchors (same IST day) with getUTCDay/getUTCDate; "today" highlight, selection and course start/end event matching all via dayKey (was toDateString/getDate local comparisons); month header toLocaleDateString now passes timeZone: APP_TIMEZONE; month navigation via Date.UTC anchor arithmetic. Live proof: with sandbox UTC still on Oct 25 evening, the calendar correctly highlights 26 (IST today) — the old code showed 25.
+- assessment-add/edit forms: popover "Selected:/Current:" display toLocaleString (browser TZ) → formatDateTime (IST).
+- PDF/CSV export filenames that embedded browser-local "today" (insight-view, results rc-viewhelper, staff rc-viewhelper, CompletionExport CSV) → formatDate(new Date(), "-") (IST).
+- course-add/edit form date pickers: disabled-past logic compared against browser now → istTodayLocalStart(); redundant year clause dropped.
+- module-view.tsx: dialog title toLocaleDateString → formatDate; determineFeedbackStatus "today" check (local toDateString) → IST dayKey compare (instant comparison kept TZ-agnostic).
+- Deliberately untouched: ui/calendar.tsx + ui/chart.tsx internals (react-day-picker grid internals & number formatting — visual widget only, IST users unaffected), data/student/assessments.ts addMinutesToTime/setHours arithmetic (pure wall-clock math on IST-derived strings, internally consistent, already timezone-aware via getCurrentISTTime), commented-out legacy disabled logic.
+- Verification: tsc clean; lint clean on all touched files (remaining component-in-render errors in rc-viewhelper are pre-existing upstream, confirmed via git diff — my change is 2 lines). Browser (agent-browser): student assessments card 22/10/2026 + 23:59 IST + Expired correct; student dashboard calendar "October 2026", event on day 16, today=26 (IST) while UTC is still the 25th; admin assessment table 23:59/01:00/22-10-2026; admin feedbacks page zero hydration errors (fix-4 regression pass). bun unit check: formatTime12 11:59 PM, formatTime 23:59, formatDateTime "22/10/2026, 23:59:00", formatDate both separators. Zero console errors on all visited pages; dev.log clean.
+
+Stage Summary:
+- The whole app now renders and computes calendar dates/times in the server timezone Asia/Kolkata via one shared toolkit (formatDate/formatDateTime/formatTime/formatTime12/getISTParts/istWallClock/istTodayLocalStart): no more device-dependent clocks, no UTC/IST status bugs for evening assessments, pickers store unambiguous IST instants, and SSR always matches the client. Grep sweep confirms zero remaining un-pinned toLocale*/local-getter display sites (picker widget internals intentionally excluded).
+
+---
+Task ID: fix-5
+Agent: Z.ai Code (main)
+Task: Fix calendar UI glitch on student dashboard (user screenshot: overlapping/misaligned day cells, cells overflowing past the Sat column, event title spilling out of its cell, unreadable Sunday text)
+
+Work Log:
+- Reproduced in agent-browser as student2@atom.com at 1280px: day cells rendered with fixed `w-70` (280px) inside a fluid `grid-cols-7` grid whose tracks are ~145px at that viewport -> every cell overflowed its track by ~135px, overlapped the next cells, and pushed each row far past the container (days 3/10 cut off at the right edge). Secondary defects found in the same component: weekday header was a flex row (no gap) while the day grid used `gap-1` so column borders never lined up; Sunday cells forced `text-white` on `bg-violet-200` (unreadable); class-string order made `hover:bg-primary` fight event `hover:bg-green-500/50`; event titles overflowed the cell; no trailing blank cells for months not ending on Saturday; invalid `font-lg` class; `.selected` class had no CSS behind it.
+- Rewrote src/components/student-role/custom-calender.tsx keeping all the feat-3 Asia/Kolkata dayKey logic intact (getISTParts, UTC-midnight anchors, IST month header via APP_TIMEZONE): removed the fixed cell width (cells now stretch to fill their grid track, `h-24 w-full`), made the weekday header a `grid grid-cols-7 gap-1` matching the day grid, added trailing blank cells so every month ends with complete rows, explicit style precedence event-start(green) > event-end(red) > today(primary) > sunday(soft violet tint, readable text) > default(hover only), event title rendered as truncating pill (`truncate` + `title` tooltip + text-[11px]) so long course names never break the cell, selection now shows `ring-2 ring-inset ring-violet-500`, nav buttons got aria-labels + hover states, invalid classes removed, day cells are cursor-pointer.
+- Verification (all in single-call server lifecycle due to sandbox reaper): tsc clean; lint shows only pre-existing upstream rc-viewhelper/rc-data-table errors (untouched); browser as student2: header cell width == day cell width (145px == 145px), 35 cells for Oct 2026 (4 leading + 31 days, no trailing needed), no horizontal overflow, today highlight on 26 (Asia/Kolkata), green event "Full Stack Java Start" contained in cell 16, month nav Oct->Nov(35 cells incl. 5 trailing)->Oct both fine, day-click selection ring visible, dark mode clean, zero page errors. Screenshots: upload/cal-after-1280.png, upload/cal-after-wide.png (2560px = user's setup), upload/cal-after-dark.png.
+- Environment note: repeated dev-server deaths root-caused to (a) OOM when Chromium + webpack compiles ran together (dmesg oom-kill, next-server 2.4GB RSS; package.json dev script's inner NODE_OPTIONS=2048 overrides any outer cap) and (b) sandbox reaping detached server processes between tool calls (setsid/nohup/disown do not survive). Reliable pattern: single-call flows that start the server, curl-warm routes (NextAuth credentials login via /api/auth/csrf + callback/credentials with cookie jar), then run agent-browser; browser closed at the end of each call.
+
+Stage Summary:
+- Student dashboard calendar no longer glitches at any viewport: cells fill their tracks, header columns align 1:1 with day columns, events/to-days are contained and readable, selection has a visible ring, and the Asia/Kolkata timezone behavior from feat-3 is preserved. Component remains the single calendar source for the student dashboard.

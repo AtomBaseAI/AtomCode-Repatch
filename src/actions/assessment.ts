@@ -227,7 +227,7 @@ export const addassessmentquestions = async (assessmentId: string, questionIds: 
       id: assessmentId,
     },
     data: {
-      questions: {
+      codeQuestions: {
         connect: questionIds.map((id) => ({ id })),
       },
     },
@@ -244,7 +244,7 @@ export const deleteassessmentquestion = async (questionId: string, assessmentId:
       id: assessmentId,
     },
     data: {
-      questions: {
+      codeQuestions: {
         disconnect: { id: questionId },
       },
     },

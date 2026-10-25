@@ -15,7 +15,7 @@ export const getAllModulesByCourseId = async (id: string) => {
                 courseId: true,
                 _count: {
                     select: {
-                        questions: true,
+                        codeQuestions: true,
                         mcqQuestions: true,
                     },
                 },
@@ -23,7 +23,7 @@ export const getAllModulesByCourseId = async (id: string) => {
         })
         const modules = modulesdata.map(module => ({
             ...module,
-            questionscount: module._count.questions,
+            questionscount: module._count.codeQuestions,
             mcqcount: module._count.mcqQuestions
         }));
 
@@ -46,11 +46,11 @@ export const getModuleQuestionsByModuleId = async (id: string) => {
     try {
         const moduleWithQuestions = await db.module.findUnique({
             where: { id },
-            include: { questions: true }
+            include: { codeQuestions: true }
         });
 
         if (moduleWithQuestions) {
-            return moduleWithQuestions.questions;
+            return moduleWithQuestions.codeQuestions;
         } else {
             return null;
         }

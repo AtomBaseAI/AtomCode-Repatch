@@ -25,7 +25,7 @@ import { autocompletion, Completion, CompletionSource } from "@codemirror/autoco
 
 import AtomAI from '@/components/student-role/practice/code/code-ai/atom-ai';
 
-interface Question {
+interface CodeQuestion {
     id: string;
     title: string;
     description: string;
@@ -53,9 +53,9 @@ interface Question {
     submissionstatus: boolean
 }
 
-const CodeView = ({ questions, mid, uid, cid, umid }: { questions: Question[], mid: string, uid: string, cid: string, umid: string }) => {
+const CodeView = ({ questions, mid, uid, cid, umid }: { questions: CodeQuestion[], mid: string, uid: string, cid: string, umid: string }) => {
     const { theme } = useTheme();
-    const [questionData, setQuestionData] = useState<Question[]>(questions);
+    const [questionData, setQuestionData] = useState<CodeQuestion[]>(questions);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
     const handleQuestionClick = (index: number) => {
@@ -587,7 +587,7 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: Question[], m
             <aside className="sticky top-0 left-0 z-50 hidden sm:flex sm:flex-col w-20 h-screen border-r border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg">
                 <div className="flex-grow flex flex-col justify-between">
                     <nav className="flex flex-col my-4 space-y-4 overflow-y-auto max-h-[calc(100vh-10rem)]">
-                        {questionData.map((question: Question, index: number) => (
+                        {questionData.map((question: CodeQuestion, index: number) => (
                             <Button
                                 key={index}
                                 className={`inline-flex items-center justify-center mx-4 transition-colors border ${currentQuestionIndex === index
@@ -844,7 +844,7 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: Question[], m
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setSubmitTestModel(false)} className='bg-red-500 text-white w-full'>Close</AlertDialogCancel>
+                        <AlertDialogCancel onClick={() => setSubmitTestModel(false)} className='bg-red-500 text-white w-full hover:bg-red-400 hover:text-white'>Close</AlertDialogCancel>
                         <AlertDialogAction onClick={submitQuestion} className='w-full' disabled={isLoading}>
                             {isLoading && (
                                 <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
@@ -864,7 +864,7 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: Question[], m
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setEndTestModel(false)} className='bg-red-500 text-white w-full'>Close</AlertDialogCancel>
+                        <AlertDialogCancel onClick={() => setEndTestModel(false)} className='bg-red-500 text-white w-full hover:bg-red-400 hover:text-white'>Close</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={submitCode}
                             className='w-full' disabled={isLoading}>

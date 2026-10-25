@@ -81,7 +81,7 @@ const EditReference = ({ reference }: { reference: z.infer<typeof UpdateModuleRe
                         <Pencil className="size-5 bg-transparent text-primary" />
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent aria-describedby={undefined} className="sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Edit : {reference.title}</DialogTitle>
                     </DialogHeader>

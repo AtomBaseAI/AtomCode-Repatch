@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableColumnHeader } from "@/components/data-tables/data-table-column-header"
 import { CourseTableType } from "@/schemas/course-schema"
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 import CModules from "@/components/staff/course/course-table/c-modules"
 import CStudents from "@/components/staff/course/course-table/c-students"
 import CFeedbacks from "@/components/staff/course/course-table/c-feedbacks";
@@ -32,7 +32,7 @@ export const columns: ColumnDef<CourseTableType>[] = [
     ),
     cell: ({ row }) => {
       const startDate = new Date(row.getValue("startdate"))
-      const formattedStartDate = format(new Date(startDate), 'dd/MM/yyyy');
+      const formattedStartDate = formatDate(startDate);
       return (
         <div className="flex space-x-2">
           <span className="max-w-[80px] truncate font-medium ">
@@ -49,7 +49,7 @@ export const columns: ColumnDef<CourseTableType>[] = [
     ),
     cell: ({ row }) => {
       const endDate = new Date(row.getValue("enddate"))
-      const formattedEndtDate = format(new Date(endDate), 'dd/MM/yyyy');
+      const formattedEndtDate = formatDate(endDate);
       return (
         <div className="flex space-x-2">
           <span className="max-w-[80px] truncate font-medium ">
