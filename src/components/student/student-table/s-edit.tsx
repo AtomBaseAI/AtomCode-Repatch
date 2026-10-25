@@ -6,7 +6,7 @@ const SEdit = ({uid}:{uid:string}) => {
     return (
         <>
             <Button variant='outline' size='icon' className="border-primary bg-transparent hover:bg-purple-700/10" onClick={() => {router.push(`/admin/students/edit/${uid}`) }}>
-                <Pencil className="h-6 w-6 p-1 bg-transparent text-primary" />
+                <Pencil className="size-5 bg-transparent text-primary" />
             </Button>
         </>
     )

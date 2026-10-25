@@ -187,7 +187,7 @@ export const columns: ColumnDef<ResultTableStudentType>[] = [
       const name: string = row.getValue("studentname")
       const rollnumber: string = row.getValue("rollnumber")
       return (
-        <div className="flex items-center w-[50px]">
+        <div className="flex items-center">
           <span className="flex gap-2">
             <RCViewHelper mdata={mdata} name={name} rollnumber={rollnumber} />
           </span>

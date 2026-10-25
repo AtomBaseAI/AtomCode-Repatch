@@ -55,7 +55,7 @@ export const columns: ColumnDef<MCQTableType>[] = [
       }
 
       return (
-        <div className="flex items-center w-[50px]">
+        <div className="flex items-center">
           <span className="flex gap-2">
             <MCPreview question={data} />
             <EditMCQForm mcq={data} />

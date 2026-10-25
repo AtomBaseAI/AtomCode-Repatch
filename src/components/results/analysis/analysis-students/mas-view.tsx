@@ -22,7 +22,7 @@ const MASView = ({ mdata }: { mdata: mdata }) => {
                 <Tooltip >
                     <TooltipTrigger asChild>
                         <Button variant='outline' size='icon' className="border-primary bg-transparent hover:bg-primary/10" onClick={() => { router.push(`/admin/results/${mdata.cid}/analysis/${mdata.mid}/insights/${mdata.uid}`) }}>
-                            <LucideBarChartHorizontalBig className="h-7 w-7 p-1 bg-transparent text-primary" />
+                            <LucideBarChartHorizontalBig className="size-5 bg-transparent text-primary" />
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent side='top' className='bg-primary'>

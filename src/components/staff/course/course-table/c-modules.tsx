@@ -16,7 +16,7 @@ const CModules = ({ cid }: { cid: string }) => {
                     <TooltipTrigger asChild>
                         <Button variant='outline' size='icon' className="border-cyan-500 bg-transparent hover:bg-cyan-700/10"
                             onClick={() => { router.push(`/staff/courses/${cid}`) }}>
-                            <Hexagon className="h-7 w-7 p-1 bg-transparent text-cyan-500" />
+                            <Hexagon className="size-5 bg-transparent text-cyan-500" />
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent side='top' className='bg-cyan-500'>

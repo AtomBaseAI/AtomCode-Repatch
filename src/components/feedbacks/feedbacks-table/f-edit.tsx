@@ -81,7 +81,7 @@ const EditFeedback = ({ feedback }: { feedback: z.infer<typeof UpdateFeedbackSch
                 <DialogTrigger asChild>
 
                     <Button variant='outline' size='icon' className="border-primary bg-transparent hover:bg-primary/10">
-                        <Pencil className="h-7 w-7 p-1 bg-transparent text-primary" />
+                        <Pencil className="size-5 bg-transparent text-primary" />
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">

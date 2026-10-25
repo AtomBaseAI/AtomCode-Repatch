@@ -82,7 +82,7 @@ const EditStudentForm = ({ student }: { student: z.infer<typeof StudentUpdateSch
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <Button variant='outline' size='icon' className="border-primary bg-transparent hover:bg-purple-700/10 flex w-auto p-1 gap-1 text-primary justify-center items-center pr-3">
-                        <Pencil className="h-6 w-6 p-1 bg-transparent text-primary" /> Edit
+                        <Pencil className="size-5 bg-transparent text-primary" /> Edit
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[825px]">

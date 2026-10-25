@@ -16,7 +16,7 @@ const CAssessments = ({ cid }: { cid: string }) => {
                     <TooltipTrigger asChild>
                         <Button variant='outline' size='icon' className="border-amber-500 bg-transparent hover:bg-amber-700/10"
                             onClick={() => { router.push(`/admin/courses/${cid}/assessments`) }}>
-                            <FlaskConical className="h-7 w-7 p-1 bg-transparent text-amber-500" />
+                            <FlaskConical className="size-5 bg-transparent text-amber-500" />
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent side='top' className='bg-amber-500'>

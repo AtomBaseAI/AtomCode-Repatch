@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
+  // Dev-only overlay: keep the indicator out of the sidebar's bottom-left
+  // corner, where it covered the settings gear icon.
+  devIndicators: {
+    position: "bottom-right",
+  },
   // Sandbox preview gateway rewrites `x-forwarded-host` (outer fcapp.run host)
   // while the browser `origin` stays the preview-chat domain. Next.js Server
   // Actions reject that mismatch unless the origin is explicitly allowed.

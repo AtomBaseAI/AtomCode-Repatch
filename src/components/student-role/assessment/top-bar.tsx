@@ -4,9 +4,9 @@ import { useState, useTransition } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Timer } from "@/components/student-role/assessment/timer"
-import { AlertCircle, Check, LoaderIcon, Moon, Sun } from "lucide-react"
+import { AlertCircle, Check, LoaderIcon } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 import dynamic from 'next/dynamic';
-import { useTheme } from "next-themes"
 const OnlineStatus = dynamic(() => import("@/hooks/NetworkDector"), { ssr: false });
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from "sonner";
@@ -47,9 +47,6 @@ export function TopBar({ onQuestionTypeChange, tabSwitchCount, initialTime, onTi
     //totalusertabswitches
   }
 
-  const { setTheme, theme } = useTheme()
-
-
   return (
     <>
       <header className="sticky top-0 z-10 w-screen border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -64,14 +61,7 @@ export function TopBar({ onQuestionTypeChange, tabSwitchCount, initialTime, onTi
                 <SelectItem value="Code">Code</SelectItem>
               </SelectContent>
             </Select>
-            <Button
-              className="hover:text-primary bg-transparent text-black dark:text-white hover:bg-transparent my-4 border shadow-sm cursor-pointer"
-              size="icon"
-              onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
-              <Sun className="h-5 w-5 dark:hidden" />
-              <Moon className="hidden h-5 w-5 dark:block" />
-              <span className="sr-only">Toggle theme</span>
-            </Button>
+            <ThemeToggle className="my-4 border shadow-sm cursor-pointer [&_svg]:h-5 [&_svg]:w-5" />
           </div>
 
           <div className="flex items-center justify-end gap-4 w-2/3 h-full">

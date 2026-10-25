@@ -137,7 +137,7 @@ export const columns: ColumnDef<ModuleAnalysisSchemaType>[] = [
       const scx: number = row.getValue("studentsEnrolled")
 
       return (
-        <div className="flex items-center w-[50px]">
+        <div className="flex items-center">
           <span className="flex gap-2">
             {scx >= 0 && <MAView mdata={mdata} />}
           </span>

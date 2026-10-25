@@ -20,7 +20,7 @@ const MAView = ({ mdata }: { mdata: mdata }) => {
                 <Tooltip >
                     <TooltipTrigger asChild>
                         <Button variant='outline' size='icon' className="border-orange-500 bg-transparent hover:bg-orange-700/10" onClick={() => { router.push(`/staff/results/${mdata.cid}/analysis/${mdata.mid}`) }}>
-                            <Users className="h-7 w-7 p-1 bg-transparent text-orange-500" />
+                            <Users className="size-5 bg-transparent text-orange-500" />
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent side='top' className='bg-orange-500'>

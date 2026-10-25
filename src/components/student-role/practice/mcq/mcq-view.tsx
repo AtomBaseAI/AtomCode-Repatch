@@ -6,11 +6,11 @@ import {
 } from "@/components/ui/resizable";
 import MCQQuestion from '@/components/student-role/practice/mcq/mcq-question';
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, Check, ArrowRight, LoaderIcon, Loader } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import { Check, ArrowRight, LoaderIcon, Loader } from 'lucide-react';
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from "sonner"
 // import { submitmcq } from "@/actions/submitmcq";
@@ -41,15 +41,14 @@ interface UserMCQRecord {
 }
 
 const MCQView = ({ mcqs, mid, uid, umid }: { mcqs: MCQ[], mid: string, uid: string, umid: string }) => {
-    const [mcqdata, setMcqData] = useState<MCQ[]>([]);
-    const [mcqcount, setMcqCount] = useState(0);
+    const [mcqdata] = useState<MCQ[]>(mcqs);
+    const [mcqcount] = useState(mcqs.length);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState<string>("");
     const [userMcqRecord, setUserMcqRecord] = useState<UserMCQRecord[]>([]);
-    const { setTheme, theme } = useTheme();
     const [isLoading, startTransition] = useTransition()
     const [testDuration, setTestDuration] = useState<number>(0);
-    const [testStartTime, setTestStartTime] = useState<number | null>(null);
+    const [testStartTime] = useState<number | null>(() => Date.now());
     const [score, setScore] = useState<number>(0);
     const [SubmitTestModel, setSubmitTestModel] = useState(false)
     const [errors, setErrors] = useState(0)
@@ -153,11 +152,6 @@ const MCQView = ({ mcqs, mid, uid, umid }: { mcqs: MCQ[], mid: string, uid: stri
                 })
         })
     }
-    useEffect(() => {
-        setMcqData(mcqs);
-        setMcqCount(mcqs.length);
-        setTestStartTime(Date.now());
-    }, []);
     return (
         <main className="flex min-h-screen min-w-screen flex-row">
             <aside className="sticky top-0 left-0 z-50 hidden sm:flex sm:flex-col w-20 h-screen border-r border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg">
@@ -176,14 +170,7 @@ const MCQView = ({ mcqs, mid, uid, umid }: { mcqs: MCQ[], mid: string, uid: stri
                         ))}
                     </nav>
                     <div className="inline-flex flex-col items-center justify-center h-30 w-20 ">
-                        <Button
-                            className="hover:text-primary bg-transparent text-black dark:text-white hover:bg-transparent my-4 border-0 shadow-none"
-                            size="icon"
-                            onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
-                            <Sun className="h-6 w-6 dark:hidden" />
-                            <Moon className="hidden h-6 w-6 dark:block" />
-                            <span className="sr-only">Toggle theme</span>
-                        </Button>
+                        <ThemeToggle className="my-4" />
                         <Button className={`inline-flex items-center justify-center p-3 mx-4 my-1 transition-colors bg-primary`} onClick={prepareSubmit} disabled={routeBtnLoading}>
                             <span className='h-6 w-6'>
                                 {

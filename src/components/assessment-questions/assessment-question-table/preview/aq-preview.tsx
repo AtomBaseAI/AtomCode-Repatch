@@ -15,7 +15,7 @@ const AQPreview = ({ question }: { question: any }) => {
         <Dialog >
             <DialogTrigger asChild>
                 <Button variant='outline' size='icon' className="border-blue-500 bg-transparent hover:bg-blue-700/10 flex w-auto p-1 gap-1 text-blue justify-center items-center">
-                    <Eye className="h-6 w-6 p-1 bg-transparent text-blue-500" />
+                    <Eye className="size-5 bg-transparent text-blue-500" />
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[100vw] h-[100vh] overflow-y-auto overflow-x-hidden">

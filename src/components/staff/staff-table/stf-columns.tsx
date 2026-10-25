@@ -131,7 +131,7 @@ export const columns: ColumnDef<StaffTableType>[] = [
       }
 
       return (
-        <div className="flex items-center max-w-[150px]">
+        <div className="flex items-center">
           <span className="flex gap-2">
             <STFEdit uid={id} />
             <DeleteStaff uid={id} />

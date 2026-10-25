@@ -7,6 +7,7 @@ import {
   apiAuthPrefix,
   roleHome,
 } from "@/routes";
+import { AUTH_SECRET_FALLBACK } from "@/lib/auth-secret";
 
 /**
  * Standalone edge middleware (no Prisma / no NextAuth runtime here).
@@ -28,7 +29,10 @@ async function getSessionRole(req: NextRequest): Promise<{
     req.cookies.get("__Secure-authjs.session-token")?.value;
   if (!raw) return { loggedIn: false };
 
-  const secret = process.env.AUTH_SECRET;
+  // Same effective secret as src/auth.ts: env when present, shared
+  // fallback otherwise — otherwise a wiped AUTH_SECRET makes this
+  // middleware treat freshly-issued sessions as logged-out (login bounce).
+  const secret = process.env.AUTH_SECRET || AUTH_SECRET_FALLBACK;
   if (!secret) return { loggedIn: false };
 
   for (const salt of COOKIE_SALTS) {

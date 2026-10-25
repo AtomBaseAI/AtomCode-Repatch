@@ -21,7 +21,7 @@ const MReferences = ({ mdata }: { mdata: mdata }) => {
                     <TooltipTrigger asChild>
                         <Button variant='outline' size='icon' className="border-rose-500 bg-transparent hover:bg-rose-700/10"
                             onClick={() => { router.push(`/admin/courses/${mdata.cid}/modules/${mdata.mid}/references`) }}>
-                            <FileVideo className="h-7 w-7 p-1 bg-transparent text-rose-500" />
+                            <FileVideo className="size-5 bg-transparent text-rose-500" />
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent side='top' className='bg-rose-500'>

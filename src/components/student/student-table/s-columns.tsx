@@ -171,7 +171,7 @@ export const columns: ColumnDef<StudentTableType>[] = [
       }
 
       return (
-        <div className="flex items-center max-w-[150px]">
+        <div className="flex items-center">
           <span className="flex gap-2">
             <SEdit uid={id} />
             <DeleteStudent uid={id} />

@@ -1,8 +1,14 @@
 import NextAuth from "next-auth";
 import { authConfig } from "@/auth.config";
+import { AUTH_SECRET_FALLBACK } from "@/lib/auth-secret";
 
+/**
+ * Session signing secret: AUTH_SECRET when present, sandbox fallback
+ * otherwise (see src/lib/auth-secret.ts for why).
+ */
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
+  secret: process.env.AUTH_SECRET || AUTH_SECRET_FALLBACK,
   callbacks: {
     async jwt({ token, user }) {
       if (user) {

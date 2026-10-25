@@ -68,7 +68,7 @@ export const columns: ColumnDef<ModuleQuestionTableQuestionType>[] = [
       }
       const question = row.original
       return (
-        <div className="flex items-center w-[50px]">
+        <div className="flex items-center">
           <span className="flex gap-2">
             <MQPreview question={question}/>
             <QuestionDeleteHelper qid={qid} />

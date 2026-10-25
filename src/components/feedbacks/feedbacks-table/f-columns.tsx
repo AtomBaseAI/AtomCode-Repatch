@@ -72,7 +72,7 @@ export const columns: ColumnDef<FeedbackTableType>[] = [
         date: row.getValue('date'),
       }
       return (
-        <div className="flex items-center w-[50px]">
+        <div className="flex items-center">
           <span className="flex gap-2">
             <EditFeedback feedback={feedbackdata} />
             <DeleteFeedback fid={id} />

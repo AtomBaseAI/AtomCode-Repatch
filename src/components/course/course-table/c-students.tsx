@@ -16,7 +16,7 @@ const CStudents = ({ cid }: { cid: string }) => {
                 <Tooltip >
                     <TooltipTrigger asChild>
                         <Button variant='outline' size='icon' className="border-fuchsia-500 bg-transparent hover:bg-fuchsia-700/10" onClick={() => { router.push(`/admin/courses/${cid}/students`) }}>
-                            <Users className="h-7 w-7 p-1 bg-transparent text-fuchsia-500" />
+                            <Users className="size-5 bg-transparent text-fuchsia-500" />
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent side='top' className='bg-fuchsia-500'>

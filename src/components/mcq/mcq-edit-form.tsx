@@ -85,7 +85,7 @@ const EditMCQForm = ({ mcq }: { mcq: z.infer<typeof MCQUpdateSchema> }) => {
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <Button variant='outline' size='icon' className="border-primary bg-transparent hover:bg-purple-700/10">
-                        <Pencil className="h-6 w-6 p-1 bg-transparent text-primary" />
+                        <Pencil className="size-5 bg-transparent text-primary" />
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[85vw] h-[85vh]">

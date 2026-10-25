@@ -290,7 +290,7 @@ export const columns: ColumnDef<ResultAnalysisStudentType>[] = [
       const codestatus = row.original.questionstatus;
       const mcqstatus = row.original.mcqstatus;
       return (
-        <div className="flex items-center w-[70px]">
+        <div className="flex items-center">
           {(mcqstatus !== 'not submitted' || codestatus !== 'not submitted') ? (
             <span className="flex gap-2">
               <MASView mdata={mdata} />
@@ -298,7 +298,7 @@ export const columns: ColumnDef<ResultAnalysisStudentType>[] = [
           ) : (
             <>
               <Button variant='outline' size='icon' className="border-red-500 bg-transparent hover:bg-red-500/10 cursor-not-allowed" disabled>
-                <LucideBarChartHorizontalBig className="h-7 w-7 p-1 bg-transparent text-red-500" />
+                <LucideBarChartHorizontalBig className="size-5 bg-transparent text-red-500" />
               </Button>
             </>
           )

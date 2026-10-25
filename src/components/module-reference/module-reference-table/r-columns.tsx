@@ -70,7 +70,7 @@ export const columns: ColumnDef<ModuleReferenceTableType>[] = [
         type: row.getValue('type'),
       }
       return (
-        <div className="flex items-center w-[70px]">
+        <div className="flex items-center">
           <span className="flex gap-2">
             <ViewReference link={row.getValue("link")} />
             <EditReference reference={referencedata} />

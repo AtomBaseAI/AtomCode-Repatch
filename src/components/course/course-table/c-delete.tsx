@@ -67,7 +67,7 @@ const DeleteCourse = ({ cid }: { cid: string }) => {
                         <Tooltip >
                             <TooltipTrigger asChild> */}
                     <Button variant='outline' size='icon' className="border-destructive bg-transparent hover:bg-red-700/10">
-                        <Trash className="h-7 w-7 p-1 bg-transparent text-destructive" />
+                        <Trash className="size-5 bg-transparent text-destructive" />
                     </Button>
                     {/* </TooltipTrigger>
                             <TooltipContent side='top' className='bg-red-500'>

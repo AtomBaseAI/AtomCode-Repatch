@@ -1,7 +1,8 @@
 "use client"
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, ArrowLeft, Loader, FileQuestion } from 'lucide-react';
+import { ArrowLeft, Loader, FileQuestion } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
     ResizableHandle,
     ResizablePanel,
@@ -53,7 +54,7 @@ interface Question {
 }
 
 const CodeView = ({ questions, mid, uid, cid, umid }: { questions: Question[], mid: string, uid: string, cid: string, umid: string }) => {
-    const { setTheme, theme } = useTheme();
+    const { theme } = useTheme();
     const [questionData, setQuestionData] = useState<Question[]>(questions);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
@@ -606,14 +607,7 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: Question[], m
                         ))}
                     </nav>
                     <div className="inline-flex flex-col items-center justify-center h-30 w-20 ">
-                        <Button
-                            className="hover:text-primary bg-transparent text-black dark:text-white hover:bg-transparent my-4 border-0 shadow-none"
-                            size="icon"
-                            onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
-                            <Sun className="h-6 w-6 dark:hidden" />
-                            <Moon className="hidden h-6 w-6 dark:block" />
-                            <span className="sr-only">Toggle theme</span>
-                        </Button>
+                        <ThemeToggle className="my-4" />
                         <Button className={`inline-flex items-center justify-center p-3 mx-4 my-1 transition-colors bg-primary`} onClick={() => setEndTestModel(true)} disabled={routeBtnLoading}>
                             <span className='h-6 w-6'>
                                 {

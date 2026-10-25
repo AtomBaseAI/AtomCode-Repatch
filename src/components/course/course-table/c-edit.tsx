@@ -15,7 +15,7 @@ const CEdit = ({ cid }: { cid: string }) => {
                 <Tooltip >
                     <TooltipTrigger asChild>
                         <Button variant='outline' size='icon' className="border-primary bg-transparent hover:bg-purple-700/10" onClick={() => { router.push(`/admin/courses/${cid}/edit`) }}>
-                            <Pencil className="h-7 w-7 p-1 bg-transparent text-primary" />
+                            <Pencil className="size-5 bg-transparent text-primary" />
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent side='top' className='bg-primary'>

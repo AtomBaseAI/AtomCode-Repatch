@@ -6,7 +6,7 @@ const QEdit = ({qid}:{qid:string}) => {
     return (
         <>
             <Button variant='outline' size='icon' className="border-primary bg-transparent hover:bg-purple-700/10" onClick={() => {router.push(`/admin/questions/edit/${qid}`) }}>
-                <Pencil className="h-6 w-6 p-1 bg-transparent text-primary" />
+                <Pencil className="size-5 bg-transparent text-primary" />
             </Button>
         </>
     )

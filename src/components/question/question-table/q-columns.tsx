@@ -171,7 +171,7 @@ export const columns: ColumnDef<QuestionTableType>[] = [
       }
 
       return (
-        <div className="flex items-center w-[50px]">
+        <div className="flex items-center">
           <span className="flex gap-2">
             <QEdit qid={qid} />
             <DeleteQuestion qid={qid} />

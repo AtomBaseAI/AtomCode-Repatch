@@ -4,6 +4,7 @@ import { auth, signIn } from "@/auth";
 import { LoginSchema } from "@/schemas/auth-schema";
 import * as z from "zod";
 import { AuthError } from "next-auth";
+import { redirect } from "next/navigation";
 import { roleHome } from "@/routes";
 import { db } from "@/lib/db";
 
@@ -26,15 +27,22 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     return null;
   };
 
+  let role: string | null = null;
+
   try {
-    const role = await findRole();
+    role = await findRole();
     if (!role) return { error: "Invalid Credentials" };
 
-    await signIn("credentials", {
-      email,
-      password,
-      redirectTo: roleHome(role),
-    });
+    /**
+     * redirect:false — signIn must NOT build the post-login redirect itself.
+     * next-auth v5 resolves that redirect against the x-forwarded-host
+     * header, which proxied environments can poison with an internal
+     * gateway host, sending the browser to a foreign origin after a
+     * perfectly valid login (observed live: ws-feed-*.fcapp.run).
+     * The session cookie is still set on the action response; we simply
+     * navigate ourselves with a relative path below.
+     */
+    await signIn("credentials", { email, password, redirect: false });
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
@@ -46,6 +54,11 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     }
     throw error;
   }
+
+  // Must stay OUTSIDE try/catch: redirect() intentionally throws
+  // NEXT_REDIRECT. A relative path navigates on the current origin,
+  // immune to any forwarded-host poisoning.
+  redirect(roleHome(role));
 };
 
 export const currentUser = async () => {

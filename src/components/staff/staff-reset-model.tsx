@@ -63,7 +63,7 @@ const ResetPasswordStaff = ({ uid }: { uid: string }) => {
             <Dialog open={open} onOpenChange={setOpen} >
                 <DialogTrigger asChild>
                     <Button variant='outline' className="border-destructive bg-transparent hover:bg-red-700/10 flex justify-center items-center text-destructive">
-                        <Key className="h-6 w-6 p-1 bg-transparent text-destructive" /> Reset Password
+                        <Key className="size-5 bg-transparent text-destructive" /> Reset Password
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">

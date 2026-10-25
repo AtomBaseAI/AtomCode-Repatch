@@ -276,3 +276,231 @@ Work Log:
 
 Stage Summary:
 - Schema: 24 FK indexes added (db pushed). Data layer: count-only queries no longer load full relation payloads incl. password hashes; insights function parallelized. Auth: verified glitch-free end-to-end (no re-implementation warranted). UI: 8 classes of layout glitches fixed across 60+ files; every admin/staff/student route verified overflow-free at 390px and 1280px. Dev runtime: webpack + 2048MB heap cap is now the default `bun run dev` for OOM resilience.
+
+---
+Task ID: 1
+Agent: Z.ai Code (main orchestrator)
+Task: Delete default scaffoldings, clone https://github.com/AtomBaseAI/AtomCode-Repatch, move all files/folders to root /, generate essential .env, run the app.
+
+Work Log:
+- Cloned AtomBaseAI/AtomCode-Repatch to /tmp/atomcode-temp and inspected: repo root is a complete unified Next.js 16 app (src/app with (auth)/admin/staff/student groups, prisma seeded SQLite, docs/TEST-CREDENTIALS.md) plus Core_SRC/ originals; next.config.ts already carries the sandbox-preview serverActions.allowedOrigins fix.
+- Stopped the running template dev server; verified sandbox Caddyfile is byte-identical to repo's.
+- Deleted default scaffolding (src/, prisma/, public/, db/, examples/, tests/, download/, mini-services/, .next/, dev.log, package.json, bun.lock, tsconfig.json, next.config.ts, next-env.d.ts, postcss.config.mjs, tailwind.config.ts, eslint.config.mjs, components.json, .env) keeping node_modules, .git, .gitignore, Caddyfile, sandbox infra dirs.
+- rsync'd entire repo to /home/z/my-project root (excluded .git, .DS_Store): src/, prisma/, public/, db/custom.db (seeded), docs/, Core_SRC/, all configs, package.json, bun.lock, worklog.md.
+- Generated .env with 7 essentials: DATABASE_URL=file:/home/z/my-project/db/custom.db, AUTH_SECRET (openssl rand -base64 32), empty NEXT_PUBLIC_LAMBDA_URL / NEXT_PUBLIC_LAMBDA_MULTI_URL, empty OPENAI_API_KEY (AI tutor disabled), OPENAI_MODEL=gpt-4o-mini. Also wrote annotated .env.example.
+- bun install: +43 packages (codemirror suite, next-auth v5 beta.32, bcrypt-ts, openai, papaparse, react-to-pdf). prisma generate (v6.19.2); db push: "already in sync" (bundled seeded DB matches schema). Verified seed counts: Admin=2, Staff=2, User=3, Course=1.
+- Started dev server via repo script (Next 16.1.3 webpack, --max-old-space-size=2048, port 3000). First nohup launch died silently; relaunched detached with setsid - stable since.
+- Browser-verified (agent-browser): / -> 307 -> /login renders (violet Atom Code Campus theme); admin@atom.com/Admin@Atom -> /admin/dashboard with live counts (1 course / 3 students / 2 staff / 3 questions); /admin/courses data table shows "Full Stack Java" (JAVA, 2 modules); authed /login correctly bounces to role dashboard; logout -> /login; student@atom.com/User@Atom -> /student/dashboard (1 enrolled / 1 active / 0 completed) + /student/courses course card with dates and 0% progress; mobile 390x844 renders cleanly (compact sidebar rail, stacked cards, no overflow).
+- dev.log scan: all routes 200, logins 303, zero errors/crashes. One benign upstream warning (image aspect-ratio hint on login banner).
+
+Stage Summary:
+- AtomCode-Repatch fully deployed at /home/z/my-project root and running on port 3000. Default scaffolding removed; repo files (incl. Core_SRC originals and seeded SQLite DB) in place; essential .env generated; deps installed; Prisma synced. Auth, role routing, dashboards, data tables, and mobile layout all browser-verified. Test credentials in docs/TEST-CREDENTIALS.md (7 accounts, password pattern Admin@Atom/Staff@Atom/User@Atom, assessment accesskey 123456).
+
+---
+Task ID: 7
+Agent: Z.ai Code (main orchestrator)
+Task: Fix login page glitches — left logo panel must be exactly 50% (form 50%), and left side must follow light/dark theme instead of staying dark.
+
+Work Log:
+- Diagnosed with agent-browser measurements at 1024/1280/1920: root grid used `container ... place-items-center lg:grid-cols-2`; `place-items-center` shrank the left panel to its content width (500px image + p-10 = 580px) while tracks were 640/960px -> panel did not fill its half (floating black square, 60px gap at 1280, 380px gap at 1920). The unconditional `absolute inset-0 bg-zinc-900` overlay made the panel dark in both themes; `text-white` brand text was unreadable on light surfaces.
+- Rewrote src/app/(auth)/login/page.tsx: plain `grid min-h-svh lg:grid-cols-2` (default stretch) -> both children fill their 1fr tracks exactly (guaranteed 50/50 at any width); removed container/place-items-center/h-screen; banner image now responsive `h-auto w-full max-w-[500px]` so it can never distort track sizing; removed the bg-zinc-900 overlay -> panel is `bg-muted` in light, `dark:bg-zinc-900` in dark, text inherits theme foreground, `border-r dark:border-border` separation; banner rendered as rounded-2xl shadow-lg poster card in light mode (shadow disabled in dark where it blends seamlessly); right column vertically centered via its own flex with p-6 md:p-10; ThemeToggle kept top-right with z-30.
+- Verified (agent-browser): left panel width exactly vw/2 at 1024 (512px), 1280 (640px), 1920 (960px), full height, zero horizontal overflow; light mode shows light panel + dark text + rounded banner card; toggle round-trip light->dark->light works (dark screenshot verified: zinc-900 panel, seamless banner, moon icon); mobile 390x844 unchanged single-column centered form, no overflow; console 0 errors; admin login golden path re-verified (POST /login 303 -> /admin/dashboard 200); eslint clean on changed file.
+
+Stage Summary:
+- Login page now a true 50/50 split at all lg+ widths and fully theme-reactive (light: muted surface + poster-card banner; dark: original zinc-900 look preserved). Register/forgot-password pages have no banner panel and were not affected. No other files touched.
+
+---
+Task ID: 8
+Agent: Z.ai Code (main orchestrator)
+Task: Fix admin login showing "Something went wrong" and stuck loading state.
+
+Work Log:
+- dev.log triage: [auth][error] MissingSecret on /api/auth/callback/credentials -> 500; login form's .catch() rendered "Something went wrong" and the pending transition hung.
+- Root cause: the platform regenerated /home/z/my-project/.env at 14:17 on sandbox resume (restoring its 50-byte default with ONLY DATABASE_URL), wiping the generated AUTH_SECRET. DATABASE_URL survived -> DB queries fine; AUTH_SECRET gone -> MissingSecret.
+- Fix layer 1: restored full .env (DATABASE_URL, fresh AUTH_SECRET via openssl, LAMBDA x2, OPENAI vars).
+- Fix layer 2 (durability): new src/lib/auth-secret.ts exporting a fixed AUTH_SECRET_FALLBACK; consumed by BOTH auth contexts: src/auth.ts (NextAuth instances: secret = process.env.AUTH_SECRET || fallback -> fixes route handlers + server actions) and src/middleware.ts (session-cookie decode: same effective secret -> fixes silent loggedIn:false bounce that redirected freshly-authenticated users back to /login).
+- Verified by SIMULATING the exact platform wipe: wrote .env containing only DATABASE_URL, restarted, admin login -> /admin/dashboard ("WIPED_ENV_LOGIN_OK"). Then restored full .env, restarted, verified all three roles E2E: admin -> /admin/dashboard, staff@atom.com -> /staff/dashboard ("Sam Staff"), student@atom.com -> /student/dashboard ("Riya Student"); wrong-password negative test returns "Invalid Credentials" (no hang); POST /login 303s, 0 MissingSecret in dev.log; eslint clean on all 3 touched files.
+
+Stage Summary:
+- Login is fully fixed and now resilient to platform .env regeneration. Auth flows share one effective secret (env -> fallback) across NextAuth route/action context and middleware. Next sandbox resume will NOT break login even if .env is wiped again (only cosmetic: users re-login since old JWTs were signed with a previous secret).
+
+---
+Task ID: 9
+Agent: Z.ai Code (main orchestrator)
+Task: Redesign login page with a card layout + Magic UI Border Beam animation.
+
+Work Log:
+- Created src/components/magicui/border-beam.tsx — canonical Magic UI Border Beam (client component, framer-motion already in deps): mask-composite border track + gradient square traveling via offset-path rect() with anchor/duration/delay/colorFrom/colorTo props.
+- Rewrote src/app/(auth)/login/page.tsx: page wrapper bg-muted/40 (dark: bg-background) centering a shadcn Card (max-w-4xl, rounded-2xl, shadow-xl, overflow-hidden, py-0); TWO BorderBeams in the app's violet theme (#8b5cf6 <-> #d946ef, 8s linear loop, second beam offset via anchor 270 + delay 4) circling the card; inside the card the grid lg:grid-cols-2 PRESERVES the previous 50/50 logo|form split (theme-aware bg-muted / dark:bg-zinc-900 logo panel with poster-card banner + border-r, form column max-w-[350px]).
+- Verified (agent-browser): 2 beam elements + border track present; beam animation confirmed via computed offsetDistance (228.42% -> 298.17% in 1.5s = 45%/s, exactly the 8s loop); card 896x394 centered at 1280 and 1920; mobile 390px card full-width no overflow (beam size tuned 80 -> 64 to keep the title clear); light + dark screenshots verified (beam visible on both, dark seamless); admin login through the card -> /admin/dashboard ("CARD_LOGIN_OK"); eslint clean on both files; dev.log 0 errors.
+
+Stage Summary:
+- Login is now a floating card with two counter-phased Magic UI Border Beams in violet/fuchsia, preserving the 50/50 logo|form interior and full theme reactivity. New reusable magicui/border-beam.tsx available for other pages (register/forgot-password could adopt it later).
+
+---
+Task ID: 10
+Agent: Z.ai Code (main)
+Task: Login page refinements — shrink Border Beam size and relocate vendor logo from card top-left to page header row (same row as ThemeToggle)
+
+Work Log:
+- Read src/app/(auth)/login/page.tsx, border-beam.tsx, theme-toggle.tsx, branding.ts to map current structure
+- Reduced both BorderBeam `size` props from 64 → 32 (smaller traveling beam; borderWidth stays default 1.5px)
+- Moved vendor logo + VENDOR_NAME out of the card's left panel into a new page-level <header> (flex justify-between) so logo sits top-left of the page in the same row as ThemeToggle (top-right); removed the old absolute-positioned ThemeToggle wrapper
+- Changed outer wrapper to flex-col with header + <main class="flex flex-1 items-center justify-center py-6"> so the card remains vertically centered in remaining space; left panel now centers banner with powered-by pinned at bottom (justify-between retained)
+- Fixed indentation of the Card block; linted the file standalone (0 problems); verified full-repo lint errors are pre-existing and unrelated
+- Browser-verified via agent-browser: light mode, dark mode (toggle click) and 390x844 mobile — logo/toggle row correct, beam small and traveling, no console/page errors
+
+Stage Summary:
+- Login page: beam now subtle 32px; brand row (logo left + theme toggle right) at page top; 50/50 card layout and theme-adaptive styling preserved
+- File touched: src/app/(auth)/login/page.tsx only
+- Screenshots: login-light.png, login-dark.png, login-mobile.png (project root, for reference)
+
+---
+Task ID: 11
+Agent: Z.ai Code (main)
+Task: Reduce Border Beam size to 6px per user request (from previous 32px / original 64px)
+
+Work Log:
+- Edited src/app/(auth)/login/page.tsx: both BorderBeam size props changed 32 → 6
+- Browser-verified on /login at 1440x900: beam now renders as a tiny 6px traveling light dot on the card border; layout (page header logo row, 50/50 card) unchanged
+- agent-browser errors: none
+
+Stage Summary:
+- BorderBeam size={6} on both beams (duration 8s, delay-offset second beam); all other login page styling untouched
+
+---
+Task ID: 12
+Agent: Z.ai Code (main)
+Task: Border Beam size 6 → 12, keep duration 8 (user request)
+
+Work Log:
+- Edited src/app/(auth)/login/page.tsx: both BorderBeam size props 6 → 12; duration already 8, unchanged
+- Browser-verified at 1440x900: beam renders as small 12px traveling light on card border; no console/page errors
+
+Stage Summary:
+- Final beam config: size={12}, duration={8}, second beam delayed 4s at anchor 270; rest of login page untouched
+
+---
+Task ID: 13
+Agent: Z.ai Code (main)
+Task: Increase Border Beam length while keeping the same 12px width
+
+Work Log:
+- Refactored src/components/magicui/border-beam.tsx: added `thickness` prop (defaults to `size` for backward compat); removed `aspect-square`; beam element now renders width=size (trail length) x height=thickness (border width); offset-path corner radius now uses thickness so the beam hugs corners tightly
+- Updated login page beams to size={48} thickness={12} (duration 8 unchanged) — 4x longer comet trail, same 12px thickness
+- Lint clean on both files; browser-verified light + dark mode: comet trail clearly visible traveling the card border, no console/page errors; header row and 50/50 layout untouched
+
+Stage Summary:
+- BorderBeam component now supports independent trail length (size) vs border thickness (thickness); only consumer is the login page (48x12 config)
+
+---
+Task ID: 14
+Agent: Z.ai Code (main)
+Task: Slow down Border Beam animation ("little bit slower")
+
+Work Log:
+- Edited src/app/(auth)/login/page.tsx: both BorderBeam duration 8 → 10 (20% slower); second beam delay 4 → 5 to preserve the half-loop offset between the two comets
+- Verified via agent-browser eval: offsetDistance advancing at 36 points/sec (= 360-point loop / 10s, exactly 20% slower than before); beams render correctly (caught on right edge / bottom edge / top-right corner frames this session)
+- No console/page errors; no layout changes
+
+Stage Summary:
+- Beam config now: size={48} thickness={12} duration={10}, second beam delay={5} anchor={270}
+
+---
+Task ID: 15
+Agent: Z.ai Code (main)
+Task: Implement Magic UI Hexagon Pattern (linear-gradient mask) in the login card background
+
+Work Log:
+- Fetched official Magic UI registry source via https://magicui.design/r/hexagon-pattern.json (no registry dependencies)
+- Created src/components/magicui/hexagon-pattern.tsx (official source + "use client"); supports radius/gap/x/y/direction/strokeDasharray/hexagons props
+- Applied to login Card as bottom layer with the demo config: radius={40} x={-1} y={-1} + mask "[mask-image:linear-gradient(to_bottom_right,white,transparent,transparent)]" — hexagons visible top-left of card, fading to bottom-right; left banner panel's opaque bg naturally covers it on that half
+- Fixed a hydration mismatch: Math.cos/sin differ by 1 ulp between SSR runtime and browser, so SVG polygon points attributes didn't match; quantized trig-derived coordinates to 3 decimals in hexVertexList (comment documents the reason)
+- Verified: zero console/page errors after fix; pattern renders in light + dark (subtle gray-400/30 hexagons) and mobile 390x844; border beam and layout unaffected; lint clean on both files
+
+Stage Summary:
+- New reusable component: src/components/magicui/hexagon-pattern.tsx (RSC-safe SVG honeycomb pattern)
+- Login card now has Magic UI hexagon-pattern background with diagonal gradient fade; all previous features (beam 48x12 @10s, header logo row, 50/50 split) intact
+
+---
+Task ID: 16
+Agent: Z.ai Code (main)
+Task: Move Hexagon Pattern from card background to page background
+
+Work Log:
+- Edited src/app/(auth)/login/page.tsx: removed HexagonPattern from inside the Card; added it as first child of the outer page wrapper (relative, min-h-svh) with identical demo config (radius 40, x=-1, y=-1, diagonal gradient mask)
+- Pattern now spans the full viewport: hexagons visible top-left of the page fading toward bottom-right; card (opaque bg, positioned after in DOM) floats cleanly above it; header (z-30) unaffected
+- Lint clean; verified light + dark + mobile 390x844 via agent-browser — dark mode shows the honeycomb beautifully across the dark background; no console/page errors
+
+Stage Summary:
+- Hexagon pattern is now a page-level background layer on the login route; card interior restored to clean surface; all prior features (beam 48x12 @10s, header logo row, 50/50 split) unchanged
+
+---
+Task ID: 17
+Agent: Z.ai Code (main)
+Task: Beam reshaped — 2x longer, thinner, much slower (shooting-star look)
+
+Work Log:
+- Edited src/app/(auth)/login/page.tsx BorderBeams: size (trail length) 48 → 96 (2x), thickness (width across border) 12 → 6, duration 10 → 20 (much slower), second-beam delay 5 → 10 to preserve half-loop spacing
+- Lint clean; verified light + dark via agent-browser: sleek long thin comet visible on card edges, hexagon page background unaffected, no console/page errors
+
+Stage Summary:
+- Final beam: size={96} thickness={6} duration={20}, twin beam delayed 10s at anchor 270; hexagon pattern on page background unchanged
+
+---
+Task ID: 18
+Agent: Z.ai Code (main)
+Task: Fix login — valid admin credentials showed "Something went wrong" + stuck loading spinner
+
+Work Log:
+- Reproduced via agent-browser: login worked on http://localhost:3000 but through the preview proxy domain the post-login redirect went to a FOREIGN origin (https://ws-feed-cbbebdf-iarrsclfxz.cn-hongkong-vpc.fcapp.run/admin/dashboard) — browser left the app, client transition hung (loading spinner) and the action promise rejected (FormError "Something went wrong")
+- Root cause: next-auth v5 beta.32 server-action signIn builds the internal auth URL + final redirect via createActionURL(), which trusts headers.get("x-forwarded-host") ?? headers.get("host"). The sandbox preview proxy chain poisons x-forwarded-host with an internal gateway host, so the redirect Location was resolved against that foreign origin. AUTH_URL is not set (and can't be hardcoded — preview domain is per-conversation)
+- Verified DB + crypto healthy first: Admin rows exist, bcrypt-ts compare("Admin@Atom", hash) === true; localhost login already succeeded (dashboard 200)
+- Fix src/actions/login.ts: signIn("credentials", { email, password, redirect: false }) — session cookies are still applied to the action's cookie jar; then redirect(roleHome(role)) with a RELATIVE path OUTSIDE the try/catch (NEXT_REDIRECT must propagate). role hoisted to let variable
+- Fix src/actions/logout.ts (same vulnerability): signOut({ redirect: false }) then redirect("/login") relatively
+- Verified through the preview proxy (user's real path): admin/staff/student logins all land on their dashboards (200, session user rendered), logout returns to /login, wrong email still shows "Invalid Credentials"; localhost flow re-verified (backward compatible); dev.log clean, no page errors; eslint clean on both files
+
+Stage Summary:
+- Login/logout no longer depend on next-auth's host-derived redirect; they always navigate with relative paths on the current origin, immune to forwarded-host poisoning. Any future proxied deployment works unchanged
+- Screenshot reference: login-fix-student-dash.png (project root)
+
+---
+Task ID: 19
+Agent: Z.ai Code (main)
+Task: Fix admin panel UI glitches — unnecessary horizontal & vertical scrollbars, clipped sidebar, purple frame bars
+
+Work Log:
+- Diagnosed 4 root causes from the user's screenshot + live DOM measurement (scrollH 982 vs clientH 950 at 1520x906):
+  1) min-w-screen (min-width:100vw) on all 3 role layouts — 100vw includes the vertical scrollbar width, so any vertical overflow made main ~8px wider than the visible area → permanent horizontal scrollbar; scrolling right clipped the sidebar icons in half (the "glitching left bar")
+  2) Sidebar bottom cluster `<div className="... h-30 w-20">` — fixed 120px box holding ~188px of controls (fullscreen/theme/settings) → overflowed the h-screen aside by ~68px → page-level vertical scrollbar + settings gear clipped at the viewport bottom
+  3) The purple "frame" on right/bottom edges = giant opaque #7700ff scrollbar thumbs (near-full size because overflow was tiny); globals.css scrollbar styling was garish (dark inset track + solid purple square thumb)
+  4) Settings pages used rigid h-[80vh] (forces overflow on short viewports) and w-1/3 cards (too narrow on mobile, text clipped)
+- Fixed layouts (admin/staff/student layout.tsx): main → `flex min-h-svh w-full flex-row`; content column plain flex-col; content area flex-1 (fills exactly the leftover height under the topbar — no forced overflow; topbar always pinned at top)
+- Fixed all 3 sidebars (components/sidebar.tsx, staff/sidebar.tsx, student-role/sidebar.tsx): aside h-screen→h-svh; nav flex-1 min-h-0 overflow-y-auto (scrolls internally on short screens); bottom cluster auto-height w-full pb-3 (no fixed h-30); button margins my-4→my-1; settings py-2; active-item border-l-4 now always present (border-transparent) → no 4px icon jump on navigation
+- Fixed all 3 settings pages: h-[80vh] → flex-1 (card centers in true leftover space); card width responsive w-full max-w-md sm:w-2/3 lg:w-1/3
+- Restyled scrollbars (globals.css): slim rounded translucent violet thumbs (hsl 262 / 35%, hover 60%), transparent tracks, scrollbar-width/color for Firefox — kills the giant purple bars
+- next.config.ts: devIndicators.position bottom-right (dev badge no longer covers the sidebar gear)
+- Verified via agent-browser at user's viewport (1520x906): settings + dashboard pages have ZERO overflow (scrollW==clientW, scrollH==clientH); long table page (/admin/students) no horizontal overflow; gear icon fully visible (bottom 882 < 906); light + dark verified; staff + student logins re-verified after fixes; mobile 390x844 no overflow, card fits; devIndicators moved; all lint clean; dev.log clean
+- Note: dev server died mid-testing (process gone) — restarted with `bun run dev`, confirmed 200
+
+Stage Summary:
+- Both phantom scrollbars eliminated platform-wide; sidebar never clips; scrollbars now match the violet theme instead of reading as a purple frame. Same fixes applied uniformly to admin/staff/student. Files: 3 layouts, 3 sidebars, 3 settings pages, globals.css, next.config.ts
+- Screenshots: admin-settings-fixed-light/dark.png, staff-settings-fixed.png, student-settings-mobile2.png, student-settings-desktop2.png (project root)
+
+---
+Task ID: 20
+Agent: Z.ai Code (main)
+Task: Fix icon rendering in table action buttons & icon buttons — icons rendered way too small / broken
+
+Work Log:
+- Root cause 1 (sizing): shadcn Button base had [&_svg:not([class*='size-'])]:size-4 which force-shrank EVERY svg child to 16px unless its class contained literal "size-" — explicit sizes like h-6 w-6 / h-7 w-7 were silently overridden (sidebar fullscreen/theme buttons rendered 16px icons instead of 24px)
+- Root cause 2 (glyph): 55 table/toolbar action buttons used <Trash className="h-6 w-6 p-1 ..."> pattern; with Tailwind border-box, p-1 shrinks the svg content area (24px box → 16px glyph), and combined with the forced 16px the visible glyph was ~8px — "way too small", essentially unrecognizable
+- Root cause 3 (layout): action cells had hard widths sized for the broken small icons (w-[120px] for 5 buttons ≈ 212px, w-[50px]/w-[70px] for 2 buttons ≈ 80px, max-w-[150px]) → buttons overflowed/clipped their cells ("not rendered properly")
+- Fixes:
+  1) button.tsx selector relaxed to [&_svg:not([class*='size-']):not([class*='h-']):not([class*='w-'])]:size-4 — classless icons keep the compact 16px default; any icon with explicit size classes is respected
+  2) Global normalization (53 component files): "h-7 w-7 p-1 bg-transparent" / "h-6 w-6 p-1 bg-transparent" → "size-5 bg-transparent" (clean 20px glyph, no padding distortion)
+  3) Freed all restrictive widths on button action cells across 23 *-columns.tsx files (module/question/mcq/assessment/course/student/staff/cs/mq/aq/rc/ma/mas/feedbacks/reference tables, admin+staff copies): w-[120px]/w-[50px]/w-[70px]/max-w-[150px] removed from action cells only — data cells (icon+label with truncate) untouched
+- Verified via agent-browser (admin session): table action svgs measured 20x20 inside 36x36 buttons; modules table (4-5 action buttons) — lastBtnRight <= cellRight (fits: true); questions table edit/delete crisp in light + dark; sidebar fullscreen/theme icons back to 24px; data-cell labels unchanged; xargs eslint over all touched files (74) clean; dev.log clean
+
+Stage Summary:
+- Every icon inside a Button now renders at its authored size: default 16px only when no size class is present; table action icons are uniform 20px glyphs in 36px buttons that fit their cells. Applies app-wide (admin + staff + student) since the fix lives in button.tsx + shared table columns

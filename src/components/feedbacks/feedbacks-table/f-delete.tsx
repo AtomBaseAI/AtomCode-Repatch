@@ -63,7 +63,7 @@ const DeleteFeedback = ({ fid }: { fid: string }) => {
             <Dialog open={open} onOpenChange={setOpen} >
                 <DialogTrigger asChild>
                     <Button variant='outline' size='icon' className="border-destructive bg-transparent hover:bg-red-700/10">
-                        <Trash className="h-7 w-7 p-1 bg-transparent text-destructive" />
+                        <Trash className="size-5 bg-transparent text-destructive" />
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">

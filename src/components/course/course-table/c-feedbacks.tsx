@@ -16,7 +16,7 @@ const CFeedbacks = ({ cid }: { cid: string }) => {
                     <TooltipTrigger asChild>
                         <Button variant='outline' size='icon' className="border-lime-500/70 bg-transparent hover:bg-lime-700/10"
                             onClick={() => { router.push(`/admin/courses/${cid}/feedbacks`) }}>
-                            <Star className="h-7 w-7 p-1 bg-transparent text-lime-500/70" />
+                            <Star className="size-5 bg-transparent text-lime-500/70" />
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent side='top' className='bg-lime-500'>
