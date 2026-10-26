@@ -120,10 +120,10 @@ const ModuleAction = ({ Module, uid, cid }: { Module: MergedModuleType | null, u
     return (
         <>
             <div className='w-8/12 h-full overflow-hidden shadow-lg p-2 border-2 flex flex-col items-center justify-start'>
-                <div className='h-2/12 bg-primary w-full rounded-md px-3 py-2 font-semibold text-white dark:text-gray-100 object-top'>
-                    {Module?.title}
+                <div className='bg-primary w-full min-h-[2.5rem] shrink-0 rounded-md px-4 py-2 font-semibold text-white dark:text-gray-100 flex items-center'>
+                    <span className="line-clamp-1">{Module?.title}</span>
                 </div>
-                <div className='h-10/12 overflow-y-auto w-full my-4'>
+                <div className='flex-1 min-h-0 overflow-y-auto w-full my-4'>
                     <Tabs
                         defaultValue="test"
                         className="w-full">

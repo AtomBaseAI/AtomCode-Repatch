@@ -697,3 +697,101 @@ Work Log:
 
 Stage Summary:
 - Student dashboard calendar no longer glitches at any viewport: cells fill their tracks, header columns align 1:1 with day columns, events/to-days are contained and readable, selection has a visible ring, and the Asia/Kolkata timezone behavior from feat-3 is preserved. Component remains the single calendar source for the student dashboard.
+
+---
+Task ID: 1
+Agent: Z.ai Code (main orchestrator)
+Task: Delete default scaffoldings, clone https://github.com/AtomBaseAI/AtomCode-Repatch, move all files/folders to project root, generate essential .env, and run the app.
+
+Work Log:
+- Cloned AtomBaseAI/AtomCode-Repatch to /tmp/atomcode-repo and inspected structure (unified Next.js 16 App Router app: Admin + Staff + Student roles, Prisma SQLite, NextAuth v5).
+- Stopped dev server and deleted default scaffolding at /home/z/my-project (src, public, prisma, db, configs, examples, tests, download, old .git).
+- Moved ALL repo files/folders (including repo .git history, src, prisma, db/custom.db, Core_SRC, docs, public, worklog.md) to project root /.
+- Generated essential .env per docs/TEST-CREDENTIALS.md: DATABASE_URL=file:/home/z/my-project/db/custom.db, AUTH_SECRET (openssl rand -base64 32), NEXT_PUBLIC_LAMBDA_URL / NEXT_PUBLIC_LAMBDA_MULTI_URL (external judge endpoints, left empty), OPENAI_API_KEY (empty = AI tutor disabled), OPENAI_MODEL=gpt-4o-mini.
+- Ran `bun install` (43 packages synced), `prisma generate`, and `prisma db push` (schema already in sync — repo ships pre-seeded db/custom.db: Admin=2, Staff=2, User=3, Course=1).
+- Started `bun run dev` (Next.js 16.1.3 webpack) — Ready in 1275ms on port 3000; dev.log streams via tee.
+- Browser-verified via agent-browser: / → 307 to /login (auth middleware, expected); admin@atom.com/Admin@Atom → /admin/dashboard rendering real seeded stats (1 course, 3 students, 2 staff, 3 questions); logout confirm dialog works; student@atom.com/User@Atom → /student/dashboard renders. No console errors, no page errors, clean dev.log.
+
+Stage Summary:
+- AtomCode-Repatch is now the project at /home/z/my-project and runs successfully on port 3000.
+- Test credentials: admin@atom.com/Admin@Atom, staff@atom.com/Staff@Atom, student@atom.com/User@Atom; assessment access key 123456 (see docs/TEST-CREDENTIALS.md).
+- Known limitations (by design, from repo docs): code-execution judge requires external NEXT_PUBLIC_LAMBDA_URL/MULTI_URL; ATOM AI tutor disabled without OPENAI_API_KEY; /forgot-password is a stub.
+
+---
+Task ID: 2
+Agent: Z.ai Code (main orchestrator)
+Task: Create folder 'elcetron' with an Electron desktop client for the student role only, plus essential REST API endpoints for it.
+
+Work Log:
+- Studied repo internals: src/data/student/*, src/actions/{login,submitmcq,submitquestion,submitmodule,assessment}.ts, src/auth.config.ts (bcrypt-ts), prisma schema, lambda judge flow in code-view.tsx.
+- Added desktop bypass in src/middleware.ts so /api/desktop/* skips cookie-based page guards.
+- Created src/lib/desktop-auth.ts — HMAC-SHA256 signed Bearer tokens (7d TTL, AUTH_SECRET family), requireDesktopStudent guard, CORS + json/preflight helpers.
+- Created src/lib/desktop-helpers.ts — safeProfile, sanitizeMcq (strips CorrectOption), sanitizeCodeQuestion (strips hidden input1-3/output1-3), enrollment checks, UserModuleData upsert, IST clock helpers.
+- Created 14 route files / 19 endpoints under src/app/api/desktop/: auth (login/me/logout), config, student (dashboard, courses, courses/[cid]/modules, modules/[mid], practice/mcq|code|module, assessments, assessments/[aid]{,/start,/submit}, results, profile{,/password}) and /run (server-side judge proxy — judge URL and hidden test data never reach the client).
+- Created elcetron/ Electron app: main.js (BrowserWindow, IPC api:fetch proxy — no CORS, no node in renderer), preload.js (contextBridge), renderer/{index.html,styles.css,app.js} — dark teal vanilla-JS SPA: login, dashboard, courses→modules→practice (MCQ + code editor with run sample/hidden tests/submit), assessments (access key, countdown, sections, final submit), results tables, settings (profile/password/server URL). README.md + .gitignore included.
+- Data fix: seeded DB had student@atom.com isActive=0 (web login ignores the flag) → set to 1 so the student test account works; kept the isActive enforcement in the desktop login.
+- Installed Electron v33.4.11 in elcetron (npm install), node --check passed for all JS.
+- API verified via curl: login (student ok, staff→403 student-only msg, wrong pw→401, no token→401), /me, /config, dashboard, courses, modules, module detail (sanitized), MCQ submit server-graded (1 correct+1 wrong→score1/err1), dup→409, code submit, module start/submit, /run→503 graceful (lambda unset), assessments list, expired start→403, synthetic attempt detail (timer 1527s, sanitization holds) + submit (mcq1/1, code 0/1, overall 1/2) + re-submit→409, results, profile PATCH, password change+login+revert. Synthetic rows cleaned up.
+- Ran Electron under Xvfb + CDP: login screen renders; scripted login via CDP → shell "Riya Student"; navigated Dashboard (stats: 1 course, 1 module submitted, 9% avg, 50% course progress), My Courses, Assessments (expired badge), Results tables — all render live DB data; captured screenshots.
+- Lint: new desktop files = 0 problems; repo's pre-existing 118 problems untouched (original codebase).
+
+Stage Summary:
+- elcetron/ = working Electron student client (cd elcetron && npm install && npm start; connects to http://localhost:3000 by default, configurable in-app).
+- 19 token-authenticated endpoints under /api/desktop/* (student-only, bcrypt verify, HMAC tokens, server-side grading, judge proxy, sanitized payloads).
+- docs/TEST-CREDENTIALS.md still authoritative: student@atom.com / User@Atom.
+
+---
+Task ID: 3
+Agent: Z.ai Code (main orchestrator)
+Task: Implement the web app's styles and ALL student UI components in the Electron desktop app (elcetron).
+
+Work Log:
+- Studied web student UI end-to-end: layout/sidebar/topbar, dashboard + custom-calender, courses cards, ModuleView/ModuleAction/ConceptPreview, MCQView/MCQQuestion, CodeView (882 lines), AtomAI + actions/ai.ts, AssessmentCard/prepare/home, timer/top-bar, settings user-edit/user-password, lab page, globals.css violet theme (light+dark vars).
+- API parity upgrades: sanitizeCodeQuestion now exposes blacklist/whitelist/inputconstrains (client-side guardrails); new POST /api/desktop/student/ai (ATOM AI tutor proxy mirroring actions/ai.ts, question loaded server-side, 503 without key); assessment submit now grades MCQ via answers[] server-side; course modules response includes course feedbacks; ensureUserModuleData parity fix (modulestatus "started", totalquestionscore = codeCount×10 — 1 mark sample + 3×3 hidden tests per question); practice/code score clamp 0..10.
+- Rebuilt elcetron/renderer/styles.css: full shadcn violet theme port (light + .dark via body class), buttons/inputs/cards/badges/progress/tables/dialogs/toasts, violet calendar, purple-50 practice panels, radio rows, code editor (light/dark), AI sheet, assessment cards/topbar/timer/OTP slots, settings grid.
+- Rebuilt elcetron/renderer/index.html + app.js (~1500 lines): icon sidebar (lucide inline SVGs: dashboard/book/labs/assessments + theme/settings), topbar with avatar + logout; Dashboard (3 stat cards + violet calendar with IST day-keys, course start=green/end=red events, month nav); Courses grid (language SVGs copied from public/Lang → renderer/assets/Lang); Modules page (feedback accordion + module accordion with Code Space/Concept rows; right panel Practice/References/Result tabs with lock/completed states, Start/Resume/Retake dialogs, result table); practice home (breadcrumb + MCQ/Programs cards with marks, Submit Module); full-screen MCQ practice (question rail, purple split panels, radio options, Next, server-graded submit dialog); full-screen code practice (editor with lang icon + tab support, Run Sample/Run Testcases modals, blacklist/whitelist guards, score = 1 + 3×passed, ATOM AI sheet with chat); Assessments (status-band cards, prepare screen with instructions + 6-slot OTP, attempt view with countdown timer + tab-switch blur tracker + auto-submit, server-graded MCQ section, code section with per-question run/save, End Test → scores dialog); Lab empty state; Settings (profile view + edit dialog, password dialog, server reconnect, service badges, about).
+- Theme toggle persists (localStorage), light/dark across all views.
+- Fixed during CDP-verified testing: (a) missing sidebar icon injection; (b) scoping bug where A.answers leaked into openMcqPractice (ReferenceError before options rendered); (c) corrupted destructure line; (d) native confirm() blocking renderer → custom dialog; (e) resume path demanded access key → now skipped; (f) remainingtime computed with server-local Date (UTC server) → new TZ-independent remainingSecondsIST() helper (IST wall-clock anchored to UTC) used by start + detail routes; verified remainingtime 3594 for 01:00 duration.
+- CDP-driven verification with screenshots: login → dashboard (stats + calendar event on 16th, today highlighted) → courses (Java SVG card) → modules (feedbacks expired badges, Practice tab with Start Module) → practice home (MCQ 2/Marks 2, Programs 2/Marks 20) → MCQ practice (options, answers, submit → "MCQ Submitted", DB: score 2/errors 0) → code practice (editor input, submit → row created, module totals updated) → Submit Module → "Module Completed!" → assessments (card status bands) → prepare (instructions + OTP) → attempt (timer 59:39 counting down, tab counter, End Test → "Assessment submitted!" scores dialog MCQ 0/0 Code 0/1) → settings light+dark → lab. Graceful 503 toasts for judge/AI when unset.
+- Test data hygiene: assessment date temporarily moved to now for UI testing, restored to original value after; synthetic attempt rows cleaned.
+- Lint: all desktop API files clean.
+
+Stage Summary:
+- elcetron now mirrors the web app's complete student UI (violet shadcn theme, light/dark, all pages: dashboard+calendar, courses, modules, MCQ/code practice, assessments with OTP+timer+proctor counter, settings, labs) on top of the token API.
+- New/changed backend: /api/desktop/student/ai, answers-based assessment grading, feedbacks in modules, blacklist/whitelist exposure, 10-marks-per-question parity, remainingSecondsIST TZ fix.
+
+---
+Task ID: fix-6
+Agent: Z.ai Code (main orchestrator)
+Task: /student/courses/[course]/module page UI fixes per user screenshot — (1) right-side purple title block had excessive height, (2) left modules/feedbacks accordion used underlines instead of card design, (3) current module should have primary border, completed module green border — mirrored in the Electron desktop app (elcetron).
+
+Work Log:
+- Root-caused title height: module-action.tsx used `h-2/12` (percentage of 42rem parent ≈ 7rem). Replaced with natural height (`min-h-[2.5rem] px-4 py-2 flex items-center` + line-clamp-1 span, shrink-0) and changed the tabs body from `h-10/12` to `flex-1 min-h-0` so layout no longer depends on the old split.
+- Rewrote accordion styling at the module-view.tsx usage site (shared ui/accordion.tsx untouched): AccordionItem now `mb-3 rounded-lg border shadow-sm bg-card overflow-hidden last:border-b` (border on all sides + small shadow instead of border-b underline); AccordionTrigger `px-4 py-3.5 items-center hover:no-underline`; AccordionContent `pt-0 pb-4 px-4`. Applied to both Feedbacks and module items.
+- Status borders on module cards: modulestatus==='submitted' → `border-green-500` + subtle `bg-green-50/60 dark:bg-green-950/20` tint + green "Completed" pill badge (Check icon) next to the title; else selectedModule (module shown in right panel) → `border-primary`; completed state wins over selected. Non-selected default keeps hover:border-primary.
+- Electron mirror (elcetron/renderer): styles.css `.acc-item` → bordered/rounded card with box-shadow + margin-bottom, `.acc-trigger` padding 0.85rem/1rem + hover underline removed, `.acc-content` 0 1rem 0.85rem, new `.acc-item.current{border-color:var(--primary)}` and `.acc-item.done{border-color:hsl(142 71% 45%); background:hsl(142 71% 45%/0.05)}`; `.mp-title` pinned compact (min-height 2.5rem, flex align-center, nowrap+ellipsis). app.js renderModules/paintList now computes progress status per module and emits `done`/`current` classes (done wins over current), adds the "✓ Completed" badge in the trigger, and keeps Code Space row `selected` border in sync.
+- Reinstalled electron in elcetron (node_modules had been wiped; npm v12 did not create .bin symlinks — launch via `node node_modules/electron/cli.js <appdir>`).
+- Verification: eslint on touched web files clean (only pre-existing upstream react-hooks/set-state-in-effect in module-view useEffect, present before this change; confirmed untouched); node --check app.js OK.
+- Browser-verified WEB (agent-browser, student@atom.com): title block now ~2.5rem; accordion renders as spaced cards with borders+shadows; Java Basics (submitted) shows green border + Completed badge; clicking OOP in Java → Code Space moves primary border to OOP card and right panel title updates; dark mode renders correctly (green-950 tint, cards readable). Zero page errors. Screenshots: upload/mod-after-web.png, mod-after-web2.png, mod-after-web-dark.png.
+- Browser-verified ELECTRON (Xvfb + CDP 9222, scripted login): login → dashboard (stats+calendar render) → courses → modules; initial classes [open | done | ""] correct; after selecting OOP: ["acc-item", "acc-item done", "acc-item open current"]; #mp-title height 40px; screenshots upload/elec-dash.png, elec-courses.png, elec-modules.png, elec-modules-current.png. Electron processes reaped between tool calls — all steps run in single server-lifecycle calls.
+- dev.log clean for module page (200, no runtime errors); dev server untouched on port 3000.
+
+Stage Summary:
+- Module page left accordion is now a card list (border all sides + small shadow, no underlines) with primary border for the module currently shown in the right panel and green border + Completed badge for submitted modules; right-side purple title block is compact; identical visuals ported to the Electron desktop client. No API or data changes.
+
+---
+Task ID: 4
+Agent: Z.ai Code (main orchestrator)
+Task: elcetron — add app build and export (installer packaging) scripts for the Electron student desktop client.
+
+Work Log:
+- Installed electron-builder@25.1.8 as devDependency (joins electron ^33.2.0).
+- Generated the previously-missing app icon with PIL: renderer/assets/icon.png (512x512 RGBA, violet gradient rounded square + white atom orbits/nucleus/electrons matching the app's primary hsl(262 83% 58%) theme) + icon-256.png. electron-builder auto-converts the PNG for linux/win/mac targets.
+- Rewrote elcetron/package.json: added homepage (repo URL), author, license; new scripts — build (electron-builder --dir, unpacked sanity build), export (current-OS installers), export:linux (AppImage+deb), export:win (NSIS+portable x64), export:mac (dmg+zip), export:all; full "build" packaging config (appId com.atomcode.student, asar, files=[main.js, preload.js, renderer/**, package.json], per-platform targets/icons/categories/artifact naming, NSIS user-level oneClick=false with editable install dir + shortcuts).
+- First export:linux hit "Please specify project homepage" from fpm (deb) — fixed by adding package.json homepage. No other config issues.
+- Verified end-to-end in-sandbox: npm run build → dist/linux-unpacked (app.asar present); smoke-tested the packaged binary under Xvfb+CDP (binary dist/linux-unpacked/atomcode-student-desktop) — window loads AtomCode Student renderer from inside app.asar, CDP json/version OK (only harmless dbus warnings). npm run export:linux produced "AtomCode Student-1.0.0-linux-x86_64.AppImage" (104M, valid ELF runtime, --appimage-extract verified) and "AtomCode Student-1.0.0-linux-amd64.deb" (72M; dpkg-deb -I shows correct Package/Version/Maintainer/Depends).
+- npm run export:win attempted from Linux → fails ERR_ELECTRON_BUILDER_CANNOT_EXECUTE because wine is not installed (exe resource editing requires wine on Linux); environment limitation, not config. Documented in README: win export needs wine64 on Linux (or run on Windows), mac export must run on macOS.
+- README.md gained a "Build & Distribute" section (script table, per-platform notes, artifact naming, NSIS behavior); dist/ already git-ignored.
+
+Stage Summary:
+- elcetron now has complete build/export tooling: npm run build (unpacked), npm run export / export:linux / export:win / export:mac / export:all, electron-builder config in package.json, real app icon, and working artifacts (AppImage 104M + deb 72M verified in dist/). Windows/macOS targets are configured and ready for their respective build environments.

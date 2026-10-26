@@ -61,6 +61,10 @@ const ROLE_PREFIX: Record<string, string[]> = {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  // Desktop (Electron) client API — authenticates itself via Bearer tokens
+  // inside each route handler; never apply cookie-based page guards here.
+  if (pathname.startsWith("/api/desktop")) return NextResponse.next();
+
   if (pathname.startsWith(apiAuthPrefix)) return NextResponse.next();
 
   const { role, loggedIn } = await getSessionRole(req);

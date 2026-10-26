@@ -124,9 +124,12 @@ const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, uid, cid 
                 <div className='w-3/12 h-full overflow-y-auto px-1 m-1'>
                     <Accordion type="single" collapsible className="w-full" >
                         {(CourseFeedbackData && CourseFeedbackData?.length > 0) &&
-                            <AccordionItem value={`item-1`}>
-                                <AccordionTrigger>Feedbacks</AccordionTrigger>
-                                <AccordionContent>
+                            <AccordionItem
+                                value={`item-1`}
+                                className="mb-3 rounded-lg border border-border shadow-sm bg-card overflow-hidden last:border-b"
+                            >
+                                <AccordionTrigger className="px-4 py-3.5 items-center hover:no-underline">Feedbacks</AccordionTrigger>
+                                <AccordionContent className="pt-0 pb-4 px-4">
                                     <div className='flex flex-col gap-3 w-full'>
                                         {CourseFeedbackData.map((feedback, index) => {
                                             const { status, statusClass, statusClassPointer } = determineFeedbackStatus(new Date(feedback.date));
@@ -187,10 +190,32 @@ const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, uid, cid 
                                 </AccordionContent>
                             </AccordionItem>
                         }
-                        {mergedModules.map((module, index) => (
-                            <AccordionItem value={`item-1${index}`} key={index}>
-                                <AccordionTrigger>{module.title}</AccordionTrigger>
-                                <AccordionContent>
+                        {mergedModules.map((module, index) => {
+                            const isCompleted = module.modulestatus === 'submitted';
+                            const isCurrent = selectedModule?.id === module.id;
+                            const cardStateClass = isCompleted
+                                ? 'border-green-500 bg-green-50/60 dark:bg-green-950/20 hover:border-green-500'
+                                : isCurrent
+                                    ? 'border-primary hover:border-primary'
+                                    : 'hover:border-primary';
+                            return (
+                            <AccordionItem
+                                value={`item-1${index}`}
+                                key={index}
+                                className={`mb-3 rounded-lg border border-border shadow-sm bg-card overflow-hidden last:border-b transition-colors ${cardStateClass}`}
+                            >
+                                <AccordionTrigger className="px-4 py-3.5 items-center hover:no-underline">
+                                    <span className="flex items-center gap-2 text-left">
+                                        {module.title}
+                                        {isCompleted && (
+                                            <span className="inline-flex items-center gap-1 rounded-full border border-green-300 bg-green-100 px-2 py-0.5 text-[11px] font-semibold text-green-800 dark:border-green-700 dark:bg-green-900/40 dark:text-green-300">
+                                                <Check className="h-3 w-3" />
+                                                Completed
+                                            </span>
+                                        )}
+                                    </span>
+                                </AccordionTrigger>
+                                <AccordionContent className="pt-0 pb-4 px-4">
                                     <div className='flex flex-col gap-3 w-full'>
                                         <div
                                             className={`w-full flex flex-row items-center p-1 gap-2 border-2 h-10 cursor-pointer rounded-md ${selectedModule?.id === module.id ? 'border-primary' : ''} hover:border-primary hover:transition-colors duration-1000 ease-in-out`}
@@ -210,7 +235,8 @@ const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, uid, cid 
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
-                        ))}
+                            );
+                        })}
                     </Accordion>
                 </div>
                 <ModuleAction Module={selectedModule} cid={cid} uid={uid} />
